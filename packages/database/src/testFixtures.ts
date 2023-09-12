@@ -1,4 +1,4 @@
-import type { SchemaDefinition } from "../src/schema";
+import type { SchemaDefinition } from "./schema";
 
 export type User = {
   id: number;

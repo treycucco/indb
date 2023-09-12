@@ -1,7 +1,7 @@
 import type { Mock } from "vitest";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { SCHEMA, USERS_INDEX, USERS_LIST } from "./fixtures";
-import type { Tables } from "./fixtures";
+import { SCHEMA, USERS_INDEX, USERS_LIST } from "./testFixtures";
+import type { Tables } from "./testFixtures";
 import type { DatabaseEventDetail } from "../src/database";
 import Database, { deleteDatabase } from "../src//database";
 
