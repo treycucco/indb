@@ -8,7 +8,10 @@
     "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
     "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
     "clean": "rm -rf ./lib",
-    "test": "vitest --run"
+    "prettier:fix": "prettier --write src/ test/",
+    "test": "vitest --run",
+    "test:prettier": "prettier --check src/ test/",
+    "test:typecheck": "tsc"
   },
   "keywords": [
     "IndexedDB"
@@ -31,8 +34,10 @@
     "lib/**/*"
   ],
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "fake-indexeddb": "^4.0.2",
     "jsdom": "^22.1.0",
+    "prettier": "^3.0.3",
     "vitest": "^0.34.4"
   }
 }

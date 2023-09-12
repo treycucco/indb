@@ -1,4 +1,4 @@
-import type { Key, ValidKeyPaths } from "./keyPath";
+import type { Key, ValidKeyPaths } from './keyPath';
 
 export type StoreNames<Tables> = Tables extends object
   ? Exclude<keyof Tables, symbol | number>
@@ -6,7 +6,7 @@ export type StoreNames<Tables> = Tables extends object
 
 export type IndexFilter<
   Tables extends object,
-  StoreName extends StoreNames<Tables>
+  StoreName extends StoreNames<Tables>,
 > = {
   path: ValidKeyPaths<Tables[StoreName]>;
   value: Key;
@@ -36,7 +36,7 @@ export type SchemaDefinition<Tables> = {
   customMigration?: (
     transaction: IDBTransaction,
     schema: SchemaDefinition<Tables>,
-    oldVersion: number
+    oldVersion: number,
   ) => void;
 };
 
@@ -51,7 +51,7 @@ export type SchemaDefinition<Tables> = {
 export const migrateSchema = <Tables>(
   transaction: IDBTransaction,
   schema: SchemaDefinition<Tables>,
-  oldVersion: number
+  oldVersion: number,
 ) => {
   for (const storeName of Object.keys(schema.stores)) {
     const storeDefinition =

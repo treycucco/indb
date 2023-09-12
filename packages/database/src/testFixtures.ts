@@ -1,4 +1,4 @@
-import type { SchemaDefinition } from "./schema";
+import type { SchemaDefinition } from './schema';
 
 export type User = {
   id: number;
@@ -18,10 +18,10 @@ export const SCHEMA: SchemaDefinition<Tables> = {
   version: 1,
   stores: {
     users: {
-      keyPath: "id",
+      keyPath: 'id',
       indices: {
-        lastName: {},
-        "favorite.color": {},
+        'lastName': {},
+        'favorite.color': {},
       },
     },
   },
@@ -30,47 +30,47 @@ export const SCHEMA: SchemaDefinition<Tables> = {
 export const USERS_LIST: Array<User> = Object.freeze([
   {
     id: 1,
-    firstName: "A",
-    lastName: "A",
-    favorite: { color: "red", animal: "dog" },
+    firstName: 'A',
+    lastName: 'A',
+    favorite: { color: 'red', animal: 'dog' },
   },
   {
     id: 2,
-    firstName: "B",
-    lastName: "A",
-    favorite: { color: "green", animal: "cat" },
+    firstName: 'B',
+    lastName: 'A',
+    favorite: { color: 'green', animal: 'cat' },
   },
   {
     id: 3,
-    firstName: "A",
-    lastName: "B",
-    favorite: { color: "blue", animal: "bird" },
+    firstName: 'A',
+    lastName: 'B',
+    favorite: { color: 'blue', animal: 'bird' },
   },
   {
     id: 4,
-    firstName: "B",
-    lastName: "B",
-    favorite: { color: "blue", animal: "lizard" },
+    firstName: 'B',
+    lastName: 'B',
+    favorite: { color: 'blue', animal: 'lizard' },
   },
   {
     id: 5,
-    firstName: "A",
-    lastName: "C",
-    favorite: { animal: "hamster" },
+    firstName: 'A',
+    lastName: 'C',
+    favorite: { animal: 'hamster' },
   },
   {
     id: 6,
-    firstName: "B",
-    lastName: "C",
-    favorite: { color: "blue" },
+    firstName: 'B',
+    lastName: 'C',
+    favorite: { color: 'blue' },
   },
-  { id: 7, firstName: "A", lastName: "D" },
-  { id: 8, firstName: "B", lastName: "D" },
-  { id: 9, firstName: "A", lastName: "E" },
+  { id: 7, firstName: 'A', lastName: 'D' },
+  { id: 8, firstName: 'B', lastName: 'D' },
+  { id: 9, firstName: 'A', lastName: 'E' },
 ]).map((user) => Object.freeze(user));
 
 export const USERS_INDEX: Record<number, User> = Object.freeze(
-  Object.fromEntries(USERS_LIST.map((user) => [user.id, user]))
+  Object.fromEntries(USERS_LIST.map((user) => [user.id, user])),
 );
 
 export const compareUsers = (left: User, right: User): number => {

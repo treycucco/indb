@@ -1,7 +1,7 @@
-import { getKeyPathValue } from "./keyPath";
-import type { Key, KeyExtractor, ValidKeyPaths } from "./keyPath";
-import type { SchemaDefinition, StoreNames } from "./schema";
-import { migrateSchema } from "./schema";
+import { getKeyPathValue } from './keyPath';
+import type { Key, KeyExtractor, ValidKeyPaths } from './keyPath';
+import type { SchemaDefinition, StoreNames } from './schema';
+import { migrateSchema } from './schema';
 
 /**
  * This class provides a convenient (thought limited) API on top of IndexedDB.
@@ -106,7 +106,7 @@ export default class Database<Tables> {
    */
   close(unsubscribe = false) {
     if (this.isClosed) {
-      throw new Error("Cannot call close when the database is not open");
+      throw new Error('Cannot call close when the database is not open');
     }
 
     if (unsubscribe) {
@@ -122,9 +122,9 @@ export default class Database<Tables> {
    */
   async get<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    key: Key
+    key: Key,
   ): Promise<Tables[StoreName] | undefined> {
-    const { store } = await this.store(storeName, "readonly");
+    const { store } = await this.store(storeName, 'readonly');
     return this.getFromStoreOrIndex(store, key);
   }
 
@@ -132,9 +132,9 @@ export default class Database<Tables> {
    * Get all objects in an object store.
    */
   async getAll<StoreName extends StoreNames<Tables>>(
-    storeName: StoreName
+    storeName: StoreName,
   ): Promise<Array<Tables[StoreName]>> {
-    const { store, transaction } = await this.store(storeName, "readonly");
+    const { store, transaction } = await this.store(storeName, 'readonly');
     const request = store.getAll();
 
     return new Promise<Array<Tables[StoreName]>>((resolve, reject) => {
@@ -157,7 +157,7 @@ export default class Database<Tables> {
   async getIndex<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     indexName: ValidKeyPaths<Tables[StoreName]>,
-    key: Key
+    key: Key,
   ): Promise<Tables[StoreName] | undefined> {
     const { index } = await this.index(storeName, indexName);
     return this.getFromStoreOrIndex(index, key);
@@ -169,7 +169,7 @@ export default class Database<Tables> {
   async getIndexAll<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     indexName: ValidKeyPaths<Tables[StoreName]>,
-    key: Key
+    key: Key,
   ): Promise<Array<Tables[StoreName]>> {
     const { index, transaction } = await this.index(storeName, indexName);
     const request = index.getAll(key);
@@ -186,9 +186,9 @@ export default class Database<Tables> {
    * Get the count of objects in an object store.
    */
   async getCount<StoreName extends StoreNames<Tables>>(
-    storeName: StoreName
+    storeName: StoreName,
   ): Promise<number> {
-    const { store, transaction } = await this.store(storeName, "readonly");
+    const { store, transaction } = await this.store(storeName, 'readonly');
     const request = store.count();
 
     return new Promise<number>((resolve, reject) => {
@@ -204,7 +204,7 @@ export default class Database<Tables> {
   async getIndexCount<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     indexName: ValidKeyPaths<Tables[StoreName]>,
-    key: Key
+    key: Key,
   ): Promise<number> {
     const { index, transaction } = await this.index(storeName, indexName);
     const request = index.count(key);
@@ -225,9 +225,9 @@ export default class Database<Tables> {
    */
   async put<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    obj: Tables[StoreName]
+    obj: Tables[StoreName],
   ): Promise<void> {
-    const { transaction, store } = await this.store(storeName, "readwrite");
+    const { transaction, store } = await this.store(storeName, 'readwrite');
 
     store.put(obj);
 
@@ -235,7 +235,7 @@ export default class Database<Tables> {
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => {
         this.dispatch({
-          type: "created",
+          type: 'created',
           storeName,
           obj,
         });
@@ -252,9 +252,9 @@ export default class Database<Tables> {
    */
   async putMany<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    objs: Array<Tables[StoreName]>
+    objs: Array<Tables[StoreName]>,
   ): Promise<void> {
-    const { transaction, store } = await this.store(storeName, "readwrite");
+    const { transaction, store } = await this.store(storeName, 'readwrite');
 
     objs.forEach((obj) => store.put(obj));
 
@@ -262,7 +262,7 @@ export default class Database<Tables> {
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => {
         this.dispatch({
-          type: "createdMany",
+          type: 'createdMany',
           storeName,
           objs,
         });
@@ -282,12 +282,12 @@ export default class Database<Tables> {
   async update<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     key: Key,
-    updates: Partial<Tables[StoreName]>
+    updates: Partial<Tables[StoreName]>,
   ): Promise<Tables[StoreName] | undefined> {
-    const { transaction, store } = await this.store(storeName, "readwrite");
+    const { transaction, store } = await this.store(storeName, 'readwrite');
     const obj = await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(
       store,
-      key
+      key,
     );
 
     return new Promise((resolve, reject) => {
@@ -302,7 +302,7 @@ export default class Database<Tables> {
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => {
         this.dispatch({
-          type: "updated",
+          type: 'updated',
           storeName,
           obj: updated,
         });
@@ -322,11 +322,11 @@ export default class Database<Tables> {
   async upsert<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     key: Key,
-    obj: Tables[StoreName]
+    obj: Tables[StoreName],
   ): Promise<Tables[StoreName]> {
-    const { store, transaction } = await this.store(storeName, "readwrite");
+    const { store, transaction } = await this.store(storeName, 'readwrite');
     const exists = Boolean(
-      await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(store, key)
+      await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(store, key),
     );
 
     return new Promise((resolve, reject) => {
@@ -335,7 +335,7 @@ export default class Database<Tables> {
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => {
         this.dispatch({
-          type: exists ? "updated" : "created",
+          type: exists ? 'updated' : 'created',
           storeName,
           obj,
         });
@@ -352,9 +352,9 @@ export default class Database<Tables> {
    */
   async delete<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    key: Key
+    key: Key,
   ): Promise<void> {
-    const { transaction, store } = await this.store(storeName, "readwrite");
+    const { transaction, store } = await this.store(storeName, 'readwrite');
 
     return new Promise((resolve, reject) => {
       store.delete(key);
@@ -362,7 +362,7 @@ export default class Database<Tables> {
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => {
         this.dispatch({
-          type: "deleted",
+          type: 'deleted',
           storeName,
           key,
         });
@@ -378,7 +378,7 @@ export default class Database<Tables> {
    * The `KeyExtractor` uses the `keyPath` from the schema for the store name.
    */
   getKeyExtractor<StoreName extends StoreNames<Tables>>(
-    storeName: StoreName
+    storeName: StoreName,
   ): KeyExtractor<Tables[StoreName]> {
     return (obj): Key => {
       if (obj instanceof Object) {
@@ -391,7 +391,7 @@ export default class Database<Tables> {
   /**
    * Attaches an event listener to the database's `EventTarget`.
    */
-  addEventListener(type: "changed", callback: (event: DatabaseEvent) => void) {
+  addEventListener(type: 'changed', callback: (event: DatabaseEvent) => void) {
     const handler = (event: Event) => callback(event as DatabaseEvent);
 
     this.eventTarget.addEventListener(type, handler);
@@ -404,7 +404,7 @@ export default class Database<Tables> {
    */
   private getFromStoreOrIndex<ObjectType, KeyType extends Key>(
     storeOrIndex: IDBObjectStore | IDBIndex,
-    key: KeyType
+    key: KeyType,
   ): Promise<ObjectType | undefined> {
     const request = storeOrIndex.get(key);
 
@@ -414,7 +414,7 @@ export default class Database<Tables> {
         resolve(
           request.result === undefined
             ? undefined
-            : (request.result as ObjectType)
+            : (request.result as ObjectType),
         );
       };
     });
@@ -425,7 +425,7 @@ export default class Database<Tables> {
    */
   private async store<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    mode: IDBTransactionMode
+    mode: IDBTransactionMode,
   ): Promise<StoreResult> {
     const db = await this.open();
     const transaction = db.transaction(storeName, mode);
@@ -439,9 +439,9 @@ export default class Database<Tables> {
    */
   private async index<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    indexName: ValidKeyPaths<Tables[StoreName]>
+    indexName: ValidKeyPaths<Tables[StoreName]>,
   ): Promise<IndexResult> {
-    const result = await this.store(storeName, "readonly");
+    const result = await this.store(storeName, 'readonly');
     const index = result.store.index(indexName);
     return { ...result, index };
   }
@@ -453,9 +453,9 @@ export default class Database<Tables> {
     // console.debug('dispatching event', detail);
 
     this.eventTarget.dispatchEvent(
-      new CustomEvent<DatabaseEventDetail>("changed", {
+      new CustomEvent<DatabaseEventDetail>('changed', {
         detail,
-      })
+      }),
     );
 
     if (broadcast) {
@@ -467,7 +467,7 @@ export default class Database<Tables> {
    * Sets up a `BroadcastChannel` and subscribes to database change events coming through it.
    */
   private subscribeToBroadcastChannel() {
-    if (!this.broadcastChannel && "BroadcastChannel" in globalThis) {
+    if (!this.broadcastChannel && 'BroadcastChannel' in globalThis) {
       this.broadcastChannel = new BroadcastChannel(`IndexedDB:${this.name}`);
       this.broadcastChannel.onmessage = (event) => {
         // console.debug('received broadcast', event.data);
@@ -500,22 +500,22 @@ export const deleteDatabase = (name: string): Promise<void> => {
 
 export type DatabaseEventDetail =
   | {
-      type: "created";
+      type: 'created';
       storeName: string;
       obj: unknown;
     }
   | {
-      type: "createdMany";
+      type: 'createdMany';
       storeName: string;
       objs: unknown[];
     }
   | {
-      type: "updated";
+      type: 'updated';
       storeName: string;
       obj: unknown;
     }
   | {
-      type: "deleted";
+      type: 'deleted';
       storeName: string;
       key: Key;
     };

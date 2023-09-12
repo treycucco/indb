@@ -1,4 +1,4 @@
-import type { PathType, PathsToProps } from "./types";
+import type { PathType, PathsToProps } from './types';
 
 /**
  * Accepted types for store and index key paths.
@@ -33,17 +33,17 @@ const pathCache = new Map<string, string[]>();
  */
 export const getKeyPathValue = <
   ObjectType extends object,
-  KeyPath extends ValidKeyPaths<ObjectType>
+  KeyPath extends ValidKeyPaths<ObjectType>,
 >(
   obj: ObjectType,
-  path: KeyPath
+  path: KeyPath,
 ): ValidKeyPath<ObjectType, KeyPath> => {
   if (obj === null || obj === undefined) {
     return obj;
   }
 
   if (!pathCache.has(path)) {
-    pathCache.set(path, path.split("."));
+    pathCache.set(path, path.split('.'));
   }
 
   const steps = pathCache.get(path)!;

@@ -59,7 +59,7 @@ export type ValidatePath<Value, Path> = Path extends string
  * Inspired by https://stackoverflow.com/a/73179989
  */
 export type PathsToProps<Value, PropertyType> = Value extends PropertyType
-  ? ""
+  ? ''
   : {
       [Key in Extract<keyof Value, string>]: Dot<
         Key,
@@ -67,7 +67,7 @@ export type PathsToProps<Value, PropertyType> = Value extends PropertyType
       >;
     }[Extract<keyof Value, string>];
 
-type Dot<Head extends string, Tail extends string> = "" extends Tail
+type Dot<Head extends string, Tail extends string> = '' extends Tail
   ? Head
   : `${Head}.${Tail}`;
 
