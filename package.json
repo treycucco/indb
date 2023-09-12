@@ -10,8 +10,5 @@
   "license": "MIT",
   "workspaces": [
     "packages/*"
-  ],
-  "devDependencies": {
-    "typescript": "^5.2.2"
-  }
+  ]
 }

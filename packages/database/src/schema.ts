@@ -4,6 +4,7 @@ export type StoreNames<Tables> = Tables extends object
   ? Exclude<keyof Tables, symbol | number>
   : never;
 
+// TODO: Move to stores package
 export type IndexFilter<
   Tables extends object,
   StoreName extends StoreNames<Tables>,
