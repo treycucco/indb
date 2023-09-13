@@ -2,7 +2,7 @@ import type { Key, KeyExtractor } from '@indb/database';
 import type { Comparer } from '../types';
 import { findIndex, getInsertIndex } from './utils';
 
-type CollectionData<ObjectType> = {
+export type CollectionData<ObjectType> = {
   ids: Key[];
   index: Record<Key, ObjectType>;
 };
