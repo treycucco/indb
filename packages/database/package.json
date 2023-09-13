@@ -2,7 +2,8 @@
   "name": "@indb/database",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/cjs/index.js",
+  "types": "lib/cjs/types/index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",

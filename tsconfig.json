@@ -2,10 +2,5 @@
   "extends": "./configs/tsconfig.esm.json",
   "compilerOptions": {
     "noEmit": true
-  },
-  "references": [
-    { "path": "packages/database" },
-    { "path": "packages/stores" },
-    { "path": "packages/react" }
-  ]
+  }
 }

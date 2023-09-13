@@ -18,5 +18,10 @@
     "skipLibCheck": true,
 
     "composite": true
-  }
+  },
+  "references": [
+    { "path": "packages/database" },
+    { "path": "packages/stores" },
+    { "path": "packages/react" }
+  ]
 }

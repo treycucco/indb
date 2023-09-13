@@ -2,13 +2,19 @@
   "name": "@indb/stores",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "lib/cjs/index.js",
+  "types": "lib/cjs/types/index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run build:esm && npm run build:cjs",
     "build:cjs": "tsc -p ./configs/tsconfig.cjs.json",
     "build:esm": "tsc -p ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
+    "check": "npm run test:typecheck && npm run test:prettier && npm run test:eslint && npm run test",
     "clean": "rm -rf ./lib",
-    "test": "vitest --run"
+    "prettier:fix": "prettier --write src/ test/",
+    "test": "vitest --run",
+    "test:eslint": "eslint src/ test/",
+    "test:prettier": "prettier --check src/ test/",
+    "test:typecheck": "tsc"
   },
   "keywords": [
     "IndexedDB"
@@ -29,5 +35,16 @@
         "default": "./lib/cjs/index.js"
       }
     }
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.49.0",
+    "fake-indexeddb": "^4.0.2",
+    "jsdom": "^22.1.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.4"
   }
 }
