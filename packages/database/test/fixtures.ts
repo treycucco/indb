@@ -1,6 +1,6 @@
-import type { SchemaDefinition } from './schema';
+import type { SchemaDefinition } from '../src/schema';
 
-export type User = {
+type User = {
   id: number;
   firstName: string;
   lastName: string;
@@ -72,13 +72,3 @@ export const USERS_LIST: Array<User> = Object.freeze([
 export const USERS_INDEX: Record<number, User> = Object.freeze(
   Object.fromEntries(USERS_LIST.map((user) => [user.id, user])),
 );
-
-export const compareUsers = (left: User, right: User): number => {
-  const last = left.lastName.localeCompare(right.lastName);
-  if (last === 0) {
-    return left.firstName.localeCompare(right.firstName);
-  }
-  return last;
-};
-
-export const getUserKey = (user: User) => user.id;

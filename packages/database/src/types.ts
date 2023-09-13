@@ -70,5 +70,3 @@ export type PathsToProps<Value, PropertyType> = Value extends PropertyType
 type Dot<Head extends string, Tail extends string> = '' extends Tail
   ? Head
   : `${Head}.${Tail}`;
-
-export type Comparer<T> = (left: T, right: T) => number;

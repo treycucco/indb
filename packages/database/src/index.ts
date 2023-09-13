@@ -4,7 +4,6 @@ export { default as Database, deleteDatabase } from './database';
 export type { DatabaseEventDetail, DatabaseEvent } from './database';
 export type {
   StoreNames,
-  IndexFilter,
   StoreDefinition,
   StoreDefinitions,
   SchemaDefinition,
