@@ -1,6 +1,6 @@
-import type { Key, KeyExtractor } from '@indb/database';
 import type { Comparer } from '../types';
 import { findIndex, getInsertIndex } from './utils';
+import type { Key, KeyExtractor } from '@indb/database';
 
 export type CollectionData<ObjectType> = {
   ids: Key[];

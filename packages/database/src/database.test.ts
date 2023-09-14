@@ -1,9 +1,9 @@
-import type { Mock } from 'vitest';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import Database, { deleteDatabase } from '../src//database';
 import type { DatabaseEventDetail } from '../src/database';
 import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
 import type { Tables } from '../test/fixtures';
+import type { Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 describe(Database, () => {
   let dbName: string;

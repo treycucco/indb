@@ -1,9 +1,9 @@
-import { Database, deleteDatabase } from '@indb/database';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
 import type { Tables } from '../test/fixtures';
 import { waitFor } from '../test/utils';
 import Counter from './counter';
+import { Database, deleteDatabase } from '@indb/database';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 describe(Counter, () => {
   let dbName: string;

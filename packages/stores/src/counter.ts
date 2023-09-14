@@ -1,6 +1,6 @@
-import type { Database, DatabaseEvent, StoreNames } from '@indb/database';
 import DatabaseChangeConnector from './databaseChangeConnector';
 import type { IndexFilter } from './types';
+import type { Database, DatabaseEvent, StoreNames } from '@indb/database';
 
 type CounterArgs<
   Tables extends object,

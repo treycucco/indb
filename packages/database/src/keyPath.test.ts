@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest';
 import { getKeyPathValue } from './keyPath';
+import { describe, expect, test } from 'vitest';
 
 type User = {
   id: number;

@@ -1,3 +1,6 @@
+import Collection from './collection';
+import DatabaseChangeConnector from './databaseChangeConnector';
+import type { Comparer, IndexFilter } from './types';
 import type {
   Database,
   DatabaseEvent,
@@ -6,9 +9,6 @@ import type {
   StoreNames,
 } from '@indb/database';
 import { getKeyPathValue } from '@indb/database';
-import Collection from './collection';
-import DatabaseChangeConnector from './databaseChangeConnector';
-import type { Comparer, IndexFilter } from './types';
 
 export interface BaseSliceArgs<
   Tables extends object,

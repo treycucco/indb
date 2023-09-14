@@ -1,4 +1,3 @@
-import { describe, expect, test } from 'vitest';
 import {
   USERS_INDEX,
   USERS_LIST,
@@ -6,6 +5,7 @@ import {
   getUserKey,
 } from '../../test/fixtures';
 import Collection from './index';
+import { describe, expect, test } from 'vitest';
 
 describe(Collection, () => {
   const u1 = USERS_INDEX[1]!;

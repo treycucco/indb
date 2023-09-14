@@ -1,5 +1,3 @@
-import { Database, deleteDatabase } from '@indb/database';
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import type { Tables } from '..//test/fixtures';
 import {
   SCHEMA,
@@ -9,6 +7,8 @@ import {
 } from '../test/fixtures';
 import { waitFor } from '../test/utils';
 import Slice from './slice';
+import { Database, deleteDatabase } from '@indb/database';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 describe(Slice, () => {
   let dbName: string;

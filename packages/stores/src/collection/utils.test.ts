@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest';
 import { findIndex, getInsertIndex } from './utils';
+import { describe, expect, test } from 'vitest';
 
 const compare = (left: number, right: number) => left - right;
 
