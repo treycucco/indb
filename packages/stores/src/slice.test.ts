@@ -1,7 +1,12 @@
 import { Database, deleteDatabase } from '@indb/database';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import type { Tables } from '..//test/fixtures';
-import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
+import {
+  SCHEMA,
+  USERS_INDEX,
+  USERS_LIST,
+  compareUsers,
+} from '../test/fixtures';
 import { waitFor } from '../test/utils';
 import Slice from './slice';
 
@@ -26,6 +31,7 @@ describe(Slice, () => {
       slice = new Slice<Tables, 'users'>({
         database: db,
         storeName: 'users',
+        compare: compareUsers,
       });
       await slice.setup();
     });
@@ -35,12 +41,14 @@ describe(Slice, () => {
     });
 
     test('db.put adds to the collection', async () => {
-      expect(slice.getSnapshot()[11]).toBeUndefined();
+      expect(slice.getSnapshot().index[11]).toBeUndefined();
 
       const newUser = { id: 11, firstName: 'Z', lastName: 'Z' };
       await db.put('users', newUser);
 
-      await waitFor(() => expect(slice.getSnapshot()[11]).toEqual(newUser));
+      await waitFor(() =>
+        expect(slice.getSnapshot().index[11]).toEqual(newUser),
+      );
     });
 
     test('db.putMany updates in and adds to the collection', async () => {
@@ -49,7 +57,7 @@ describe(Slice, () => {
       await db.putMany('users', [updated1, new100]);
 
       await waitFor(() => {
-        const index = slice.getSnapshot();
+        const { index } = slice.getSnapshot();
         expect(index[1]).toEqual(updated1);
         expect(index[100]).toEqual(new100);
       });
@@ -59,7 +67,7 @@ describe(Slice, () => {
       await db.update('users', 1, { firstName: 'Z' });
 
       await waitFor(() =>
-        expect(slice.getSnapshot()[1]).toEqual({
+        expect(slice.getSnapshot().index[1]).toEqual({
           ...USERS_INDEX[1],
           firstName: 'Z',
         }),
@@ -69,7 +77,7 @@ describe(Slice, () => {
     test('db.delete deletes from the collectiocollection', async () => {
       await db.delete('users', 1);
 
-      await waitFor(() => expect(slice.getSnapshot()[1]).toBeUndefined());
+      await waitFor(() => expect(slice.getSnapshot().index[1]).toBeUndefined());
     });
   });
 
@@ -80,6 +88,7 @@ describe(Slice, () => {
       slice = new Slice<Tables, 'users'>({
         database: db,
         storeName: 'users',
+        compare: compareUsers,
         index: {
           path: 'lastName',
           value: 'A',
@@ -93,21 +102,23 @@ describe(Slice, () => {
     });
 
     test('db.put adds to collection if value matches index', async () => {
-      expect(slice.getSnapshot()[11]).toBeUndefined();
+      expect(slice.getSnapshot().index[11]).toBeUndefined();
 
       const newUser = { id: 11, firstName: 'Z', lastName: 'A' };
       await db.put('users', newUser);
 
-      await waitFor(() => expect(slice.getSnapshot()[11]).toEqual(newUser));
+      await waitFor(() =>
+        expect(slice.getSnapshot().index[11]).toEqual(newUser),
+      );
     });
 
     test('db.put removes from collection if value does not matche index', async () => {
-      expect(slice.getSnapshot()[1]).not.toBeUndefined();
+      expect(slice.getSnapshot().index[1]).not.toBeUndefined();
 
       const updatedUser = { id: 1, firstName: 'Z', lastName: 'Z' };
       await db.put('users', updatedUser);
 
-      await waitFor(() => expect(slice.getSnapshot()[1]).toBeUndefined());
+      await waitFor(() => expect(slice.getSnapshot().index[1]).toBeUndefined());
     });
 
     test('db.putMany adds matching items to index', async () => {
@@ -115,20 +126,18 @@ describe(Slice, () => {
       const new100 = { id: 100, firstName: 'D', lastName: 'A' };
       await db.putMany('users', [update3, new100]);
 
-      await waitFor(() => {
-        expect(new Set(Object.keys(slice.getSnapshot()))).toEqual(
-          new Set(['1', '2', '3', '100']),
-        );
-      });
+      await waitFor(() =>
+        expect(slice.getSnapshot().ids).toEqual([1, 2, 3, 100]),
+      );
     });
 
     test('db.remove removes from the index', async () => {
-      expect(slice.getSnapshot()[1]).not.toBeUndefined();
+      expect(slice.getSnapshot().index[1]).not.toBeUndefined();
 
       await db.delete('users', 1);
 
       await waitFor(() => {
-        expect(slice.getSnapshot()[1]).toBeUndefined();
+        expect(slice.getSnapshot().index[1]).toBeUndefined();
       });
     });
   });
