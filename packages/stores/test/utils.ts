@@ -7,23 +7,33 @@ export const waitFor = async (
   callback: () => void,
   { timeout = 1000, interval = 50 }: WaitForOptions = {},
 ) => {
-  await waitForImpl(callback, Date.now(), { timeout, interval });
+  return new Promise((resolve, reject) => {
+    waitForImpl(callback, Date.now(), resolve, reject, { timeout, interval });
+  });
 };
 
 const waitForImpl = async (
   callback: () => void,
   startedAt: number,
+  resolve: (value?: unknown) => void,
+  reject: (error: unknown) => void,
   { timeout, interval }: Required<WaitForOptions>,
-) => {
+): Promise<void> => {
   try {
     callback();
+    resolve();
   } catch (ex) {
     if (Date.now() - startedAt >= timeout) {
-      throw ex;
+      reject(ex);
+    } else {
+      setTimeout(
+        () =>
+          waitForImpl(callback, startedAt, resolve, reject, {
+            timeout,
+            interval,
+          }),
+        interval,
+      );
     }
-    setTimeout(
-      () => waitForImpl(callback, startedAt, { timeout, interval }),
-      interval,
-    );
   }
 };

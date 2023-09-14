@@ -1,38 +1,22 @@
 import type { Key, StoreNames } from '@indb/database';
 import BaseSlice from './baseSlice';
-import type { BaseSliceArgs } from './baseSlice';
-import Collection from './collection';
-import type { Comparer } from './types';
-
-interface OrderedSliceArgs<
-  Tables extends object,
-  StoreName extends StoreNames<Tables>,
-> extends BaseSliceArgs<Tables, StoreName> {
-  compare: Tables[StoreName] extends object
-    ? Comparer<Tables[StoreName]>
-    : never;
-}
 
 /**
- * This class synchronizes an in-memory `Collection` with an IndexedDB objectStore. This class can
- * be used with React's `useSyncExternalStore`.
+ * This class synchronizes an in-memory `Map` with an IndexedDB objectStore. This class can be used
+ * with React's `useSyncExternalStore`.
  *
- * It sets event handlers on the `Database` instance and handles events to keep the `Collection`
+ * It sets event handlers on the `Database` instance and handles events to keep the `Map`
  * synchronized.
  *
  * If you give it an `IndexFilter` it will stay focused on those items whose value matches the
  * index value.
  */
-export default class OrderedSlice<
+export default class Slice<
   Tables extends object,
   StoreName extends StoreNames<Tables>,
 > extends BaseSlice<Tables, StoreName> {
-  private readonly collection: Collection<Tables[StoreName]>;
-
-  constructor({ compare, ...baseArgs }: OrderedSliceArgs<Tables, StoreName>) {
-    super(baseArgs);
-    this.collection = new Collection(this.getKey, compare, []);
-  }
+  private collection: Map<Key, Tables[StoreName]> = new Map();
+  private dataCache: Record<Key, Tables[StoreName]> | null = null;
 
   /**
    * Returns the collection data.
@@ -41,9 +25,11 @@ export default class OrderedSlice<
    */
   getSnapshot = () => {
     // React requires that repeated calls to `getSnapshot` return the same object (determined
-    // by `Object.is`) until the `subscribe` callback has been called. The collection implements
-    // caching on its `toData` method to handle this.
-    return this.collection.toData();
+    // by `Object.is`) until the `subscribe` callback has been called.
+    if (this.dataCache === null) {
+      this.dataCache = Object.fromEntries(this.collection.entries());
+    }
+    return this.dataCache;
   };
 
   /**
@@ -52,6 +38,7 @@ export default class OrderedSlice<
   protected override addToCollection(obj: Tables[StoreName]) {
     const changed = this.changeInCollection(obj);
     if (changed) {
+      this.dataCache = null;
       this.changeConnector.dispatchChanged();
     }
   }
@@ -64,6 +51,7 @@ export default class OrderedSlice<
       .map((obj) => this.changeInCollection(obj))
       .some(Boolean);
     if (changed) {
+      this.dataCache = null;
       this.changeConnector.dispatchChanged();
     }
   }
@@ -73,7 +61,8 @@ export default class OrderedSlice<
    */
   protected override removeFromCollection(key: Key) {
     if (this.collection.has(key)) {
-      this.collection.remove(key);
+      this.collection.delete(key);
+      this.dataCache = null;
       this.changeConnector.dispatchChanged();
     }
   }
@@ -91,7 +80,10 @@ export default class OrderedSlice<
       items = await this.database.getAll(this.storeName);
     }
 
-    this.collection.reset(items);
+    this.collection = new Map(
+      items.map((obj): [Key, Tables[StoreName]] => [this.getKey(obj), obj]),
+    );
+    this.dataCache = null;
     this.changeConnector.dispatchChanged();
   }
 
@@ -99,20 +91,21 @@ export default class OrderedSlice<
    * Decide how to change the collection with a created or updated item.
    */
   private changeInCollection(obj: Tables[StoreName]): boolean {
+    const key = this.getKey(obj);
+
     // If the item is in the collection but its value does not now match the index, remove it from
     // the collection
     if (!this.isInIndex(obj)) {
-      const key = this.getKey(obj);
       const inCollection = this.collection.has(key);
 
       if (inCollection) {
-        this.collection.remove(key);
+        this.collection.delete(key);
         return true;
       }
       return false;
     }
 
-    this.collection.add(obj);
+    this.collection.set(key, obj);
     return true;
   }
 }

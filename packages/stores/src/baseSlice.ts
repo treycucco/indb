@@ -5,6 +5,7 @@ import type {
   KeyExtractor,
   StoreNames,
 } from '@indb/database';
+import { getKeyPathValue } from '@indb/database';
 import DatabaseChangeConnector from './databaseChangeConnector';
 import type { IndexFilter } from './types';
 
@@ -83,6 +84,42 @@ export default abstract class BaseSlice<
   };
 
   /**
+   * Check to see if an item is in the index. If we are not working against an index then all items
+   * will return true.
+   */
+  protected isInIndex(obj: Tables[StoreName]): boolean {
+    if (!this.index) {
+      return true;
+    }
+
+    if (obj instanceof Object) {
+      return getKeyPathValue(obj, this.index.path) === this.index.value;
+    }
+
+    return false;
+  }
+
+  /**
+   * Add an item to the collection and dispatch a `changed` event.
+   */
+  protected abstract addToCollection(obj: Tables[StoreName]): void;
+
+  /**
+   * Add many items to the collection and dispatch a `changed` event.
+   */
+  protected abstract addManyToCollection(objs: Array<Tables[StoreName]>): void;
+
+  /**
+   * Remove an item from the collection and dispatch a `changed` event.
+   */
+  protected abstract removeFromCollection(key: Key): void;
+
+  /**
+   * Get the initial items to use to populate the collection.
+   */
+  protected abstract initializeCollection(): Promise<void>;
+
+  /**
    * This is an event handler for `Database` changed events. It will use the information in the
    * handler to keep the `Collectionn` synchronized.
    */
@@ -113,24 +150,4 @@ export default abstract class BaseSlice<
         throw new Error('Unhandled event type');
     }
   }
-
-  /**
-   * Add an item to the collection and dispatch a `changed` event.
-   */
-  protected abstract addToCollection(obj: Tables[StoreName]): void;
-
-  /**
-   * Add many items to the collection and dispatch a `changed` event.
-   */
-  protected abstract addManyToCollection(objs: Array<Tables[StoreName]>): void;
-
-  /**
-   * Remove an item from the collection and dispatch a `changed` event.
-   */
-  protected abstract removeFromCollection(key: Key): void;
-
-  /**
-   * Get the initial items to use to populate the collection.
-   */
-  protected abstract initializeCollection(): Promise<void>;
 }
