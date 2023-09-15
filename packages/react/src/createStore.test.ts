@@ -48,7 +48,7 @@ describe(createStore, () => {
     describe('index', () => {
       test('returns the correct count', async () => {
         const { result } = renderHook(() =>
-          store.useCount('users', 'lastName', 'A'),
+          store.useCount('users', { path: 'lastName', value: 'A' }),
         );
 
         await waitFor(() => expect(result.current).toBe(2));
@@ -101,7 +101,10 @@ describe(createStore, () => {
     describe('index', () => {
       test('has the correct data', async () => {
         const { result } = renderHook(() =>
-          store.useSlice('users', compareUsers, 'lastName', 'B'),
+          store.useSlice('users', compareUsers, {
+            path: 'lastName',
+            value: 'B',
+          }),
         );
 
         const bUsers = USERS_LIST.filter((user) => user.lastName === 'B');

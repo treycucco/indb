@@ -36,9 +36,11 @@ const createStore = <Tables extends object>(
     compare: Tables[StoreName] extends object
       ? Comparer<Tables[StoreName]>
       : never,
-    indexPath?: ValidKeyPaths<Tables[StoreName]>,
-    indexValue?: string,
+    index?: IndexFilter<Tables, StoreName>,
   ) => {
+    const indexPath = index?.path;
+    const indexValue = index?.value;
+
     const slice = useLifecycleMemo(() => {
       const slice = new Slice({
         database,
@@ -103,9 +105,11 @@ const createStore = <Tables extends object>(
 
   const useCount = <StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    indexPath?: ValidKeyPaths<Tables[StoreName]>,
-    indexValue?: string,
+    index?: IndexFilter<Tables, StoreName>,
   ) => {
+    const indexPath = index?.path;
+    const indexValue = index?.value;
+
     const counter = useLifecycleMemo(() => {
       const counter = new Counter({
         database,
@@ -135,7 +139,7 @@ const buildIndexFilter = <
   StoreName extends StoreNames<Tables>,
 >(
   path?: ValidKeyPaths<Tables[StoreName]>,
-  value?: string,
+  value?: Key,
 ): IndexFilter<Tables, StoreName> | undefined => {
   if (path && value) {
     return { path, value };
