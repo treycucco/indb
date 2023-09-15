@@ -9,6 +9,8 @@
   "author": "Trey Cucco <fcucco@gmail.com>",
   "license": "MIT",
   "workspaces": [
-    "packages/*"
+    "packages/database",
+    "packages/stores",
+    "packages/react"
   ]
 }

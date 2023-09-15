@@ -5,6 +5,9 @@
     "outDir": "../lib/cjs",
     "rootDir": "../src"
   },
+  "references": [
+    { "path": "../../database/configs/tsconfig.cjs.json" }
+  ],
   "include": ["../src/**/*"],
   "exclude": ["../src/**/*.test.*"]
 }

@@ -5,6 +5,10 @@
     "outDir": "../lib/esm",
     "rootDir": "../src"
   },
+  "references": [
+    { "path": "../../database/configs/tsconfig.esm.json" },
+    { "path": "../../stores/configs/tsconfig.esm.json" }
+  ],
   "include": ["../src/**/*"],
   "exclude": ["../src/**/*.test.*"]
 }

@@ -19,9 +19,10 @@
 
     "composite": true
   },
+  "files": [],
   "references": [
-    { "path": "packages/database" },
-    { "path": "packages/stores" },
-    { "path": "packages/react" }
+    { "path": "../packages/database" },
+    { "path": "../packages/store" },
+    { "path": "../packages/react" }
   ]
 }

@@ -11,6 +11,8 @@
   "plugins": ["@typescript-eslint"],
   "root": true,
   "rules": {
+    // no-unused-vars duplicates noUnusedParameters / noUnusedLocals which is set in tsconfig
+    "@typescript-eslint/no-unused-vars": "off",
     "@typescript-eslint/consistent-type-exports": "error",
     "@typescript-eslint/consistent-type-imports": [
       "error",
