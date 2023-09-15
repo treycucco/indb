@@ -16,6 +16,7 @@
     "incremental": true,
     "sourceMap": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
 
     "composite": true
   },
