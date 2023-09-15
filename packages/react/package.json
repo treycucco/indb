@@ -15,7 +15,8 @@
     "test": "vitest --run",
     "test:eslint": "eslint src/ test/",
     "test:prettier": "prettier --check src/ test/",
-    "test:typecheck": "tsc"
+    "test:typecheck": "tsc",
+    "test:watch": "vitest"
   },
   "keywords": [
     "IndexedDB",
@@ -45,6 +46,7 @@
     "use-sync-external-store": "^1.2.0"
   },
   "devDependencies": {
+    "@testing-library/react": "^14.0.0",
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/react": "^18.2.21",
     "@types/use-sync-external-store": "^0.0.4",
