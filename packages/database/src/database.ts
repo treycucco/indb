@@ -1,7 +1,12 @@
+import type { StoreChange, TransactionChange } from './change';
+import { mapTransactionChangesToStoreChanges } from './change';
 import { getKeyPathValue } from './keyPath';
 import type { Key, KeyExtractor, ValidKeyPaths } from './keyPath';
 import type { SchemaDefinition, StoreNames } from './schema';
 import { migrateSchema } from './schema';
+import Transaction from './transaction';
+
+export type DatabaseEvent = CustomEvent<StoreChange>;
 
 /**
  * This class provides a convenient (thought limited) API on top of IndexedDB.
@@ -117,6 +122,20 @@ export default class Database<Tables> {
     this.db = null;
   }
 
+  async transaction(
+    storeNames: StoreNames<Tables>[],
+    mode: IDBTransactionMode = 'readonly',
+  ): Promise<Transaction<Tables>> {
+    const db = await this.open();
+    const transaction = new Transaction<Tables>(
+      db.transaction(storeNames, mode),
+    );
+
+    transaction.promise.then(() => this.dispatchChanges(transaction.changes));
+
+    return transaction;
+  }
+
   /**
    * Get an object by key from an object store.
    */
@@ -124,8 +143,8 @@ export default class Database<Tables> {
     storeName: StoreName,
     key: Key,
   ): Promise<Tables[StoreName] | undefined> {
-    const { store } = await this.store(storeName, 'readonly');
-    return this.getFromStoreOrIndex(store, key);
+    const transaction = await this.transaction([storeName], 'readonly');
+    return transaction.get(storeName, key);
   }
 
   /**
@@ -134,16 +153,8 @@ export default class Database<Tables> {
   async getAll<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
   ): Promise<Array<Tables[StoreName]>> {
-    const { store, transaction } = await this.store(storeName, 'readonly');
-    const request = store.getAll();
-
-    return new Promise<Array<Tables[StoreName]>>((resolve, reject) => {
-      transaction.onerror = () => reject(transaction.error);
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        resolve((request.result ?? []) as Array<Tables[StoreName]>);
-      };
-    });
+    const transaction = await this.transaction([storeName], 'readonly');
+    return transaction.getAll(storeName);
   }
 
   /**
@@ -159,8 +170,8 @@ export default class Database<Tables> {
     indexName: ValidKeyPaths<Tables[StoreName]>,
     key: Key,
   ): Promise<Tables[StoreName] | undefined> {
-    const { index } = await this.index(storeName, indexName);
-    return this.getFromStoreOrIndex(index, key);
+    const transaction = await this.transaction([storeName], 'readonly');
+    return transaction.getIndex(storeName, indexName, key);
   }
 
   /**
@@ -171,15 +182,8 @@ export default class Database<Tables> {
     indexName: ValidKeyPaths<Tables[StoreName]>,
     key: Key,
   ): Promise<Array<Tables[StoreName]>> {
-    const { index, transaction } = await this.index(storeName, indexName);
-    const request = index.getAll(key);
-
-    return new Promise<Array<Tables[StoreName]>>((resolve, reject) => {
-      transaction.onerror = () => reject(transaction.error);
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () =>
-        resolve(request.result ?? ([] as Array<Tables[StoreName]>));
-    });
+    const transaction = await this.transaction([storeName], 'readonly');
+    return transaction.getIndexAll(storeName, indexName, key);
   }
 
   /**
@@ -188,14 +192,8 @@ export default class Database<Tables> {
   async getCount<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
   ): Promise<number> {
-    const { store, transaction } = await this.store(storeName, 'readonly');
-    const request = store.count();
-
-    return new Promise<number>((resolve, reject) => {
-      transaction.onerror = () => reject(transaction.error);
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-    });
+    const transaction = await this.transaction([storeName], 'readonly');
+    return transaction.getCount(storeName);
   }
 
   /**
@@ -206,14 +204,8 @@ export default class Database<Tables> {
     indexName: ValidKeyPaths<Tables[StoreName]>,
     key: Key,
   ): Promise<number> {
-    const { index, transaction } = await this.index(storeName, indexName);
-    const request = index.count(key);
-
-    return new Promise<number>((resolve, reject) => {
-      transaction.onerror = () => reject(transaction.error);
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-    });
+    const transaction = await this.transaction([storeName], 'readonly');
+    return transaction.getIndexCount(storeName, indexName, key);
   }
 
   /**
@@ -227,22 +219,11 @@ export default class Database<Tables> {
     storeName: StoreName,
     obj: Tables[StoreName],
   ): Promise<void> {
-    const { transaction, store } = await this.store(storeName, 'readwrite');
+    const transaction = await this.transaction([storeName], 'readwrite');
 
-    store.put(obj);
+    transaction.put(storeName, obj);
 
-    return new Promise((resolve, reject) => {
-      transaction.onerror = () => reject(transaction.error);
-      transaction.oncomplete = () => {
-        this.dispatch({
-          type: 'created',
-          storeName,
-          obj,
-        });
-
-        resolve();
-      };
-    });
+    return transaction.promise;
   }
 
   /**
@@ -254,22 +235,11 @@ export default class Database<Tables> {
     storeName: StoreName,
     objs: Array<Tables[StoreName]>,
   ): Promise<void> {
-    const { transaction, store } = await this.store(storeName, 'readwrite');
+    const transaction = await this.transaction([storeName], 'readwrite');
 
-    objs.forEach((obj) => store.put(obj));
+    objs.forEach((obj) => transaction.put(storeName, obj));
 
-    return new Promise((resolve, reject) => {
-      transaction.onerror = () => reject(transaction.error);
-      transaction.oncomplete = () => {
-        this.dispatch({
-          type: 'createdMany',
-          storeName,
-          objs,
-        });
-
-        resolve();
-      };
-    });
+    return transaction.promise;
   }
 
   /**
@@ -284,32 +254,10 @@ export default class Database<Tables> {
     key: Key,
     updates: Partial<Tables[StoreName]>,
   ): Promise<Tables[StoreName] | undefined> {
-    const { transaction, store } = await this.store(storeName, 'readwrite');
-    const obj = await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(
-      store,
-      key,
-    );
+    const transaction = await this.transaction([storeName], 'readwrite');
+    const updated = transaction.update(storeName, key, updates);
 
-    return new Promise((resolve, reject) => {
-      if (obj === undefined) {
-        resolve(undefined);
-      }
-
-      const updated = { ...obj, ...updates } as Tables[StoreName];
-
-      store.put(updated);
-
-      transaction.onerror = () => reject(transaction.error);
-      transaction.oncomplete = () => {
-        this.dispatch({
-          type: 'updated',
-          storeName,
-          obj: updated,
-        });
-
-        resolve(updated);
-      };
-    });
+    return transaction.promise.then(() => updated);
   }
 
   /**
@@ -324,25 +272,10 @@ export default class Database<Tables> {
     key: Key,
     obj: Tables[StoreName],
   ): Promise<Tables[StoreName]> {
-    const { store, transaction } = await this.store(storeName, 'readwrite');
-    const exists = Boolean(
-      await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(store, key),
-    );
+    const transaction = await this.transaction([storeName], 'readwrite');
+    const result = transaction.upsert(storeName, key, obj);
 
-    return new Promise((resolve, reject) => {
-      store.put(obj);
-
-      transaction.onerror = () => reject(transaction.error);
-      transaction.oncomplete = () => {
-        this.dispatch({
-          type: exists ? 'updated' : 'created',
-          storeName,
-          obj,
-        });
-
-        resolve(obj);
-      };
-    });
+    return transaction.promise.then(() => result);
   }
 
   /**
@@ -354,22 +287,11 @@ export default class Database<Tables> {
     storeName: StoreName,
     key: Key,
   ): Promise<void> {
-    const { transaction, store } = await this.store(storeName, 'readwrite');
+    const transaction = await this.transaction([storeName], 'readwrite');
 
-    return new Promise((resolve, reject) => {
-      store.delete(key);
+    transaction.delete(storeName, key);
 
-      transaction.onerror = () => reject(transaction.error);
-      transaction.oncomplete = () => {
-        this.dispatch({
-          type: 'deleted',
-          storeName,
-          key,
-        });
-
-        resolve();
-      };
-    });
+    return transaction.promise;
   }
 
   /**
@@ -399,67 +321,19 @@ export default class Database<Tables> {
     return () => this.eventTarget.removeEventListener(type, handler);
   }
 
-  /**
-   * Gets an object by key from an object store.
-   */
-  private getFromStoreOrIndex<ObjectType, KeyType extends Key>(
-    storeOrIndex: IDBObjectStore | IDBIndex,
-    key: KeyType,
-  ): Promise<ObjectType | undefined> {
-    const request = storeOrIndex.get(key);
-
-    return new Promise<ObjectType | undefined>((resolve, reject) => {
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => {
-        resolve(
-          request.result === undefined
-            ? undefined
-            : (request.result as ObjectType),
-        );
-      };
-    });
+  private dispatchChanges(transactionChanges: TransactionChange[]) {
+    const storeChanges =
+      mapTransactionChangesToStoreChanges(transactionChanges);
+    storeChanges.forEach((storeChange) => this.dispatch(storeChange));
   }
 
-  /**
-   * Starts a transaction and gets an object store by by name.
-   */
-  private async store<StoreName extends StoreNames<Tables>>(
-    storeName: StoreName,
-    mode: IDBTransactionMode,
-  ): Promise<StoreResult> {
-    const db = await this.open();
-    const transaction = db.transaction(storeName, mode);
-    const store = transaction.objectStore(storeName);
-
-    return { db, transaction, store };
-  }
-
-  /**
-   * Starts a transaction, gets an object store by name, and gets an index by name.
-   */
-  private async index<StoreName extends StoreNames<Tables>>(
-    storeName: StoreName,
-    indexName: ValidKeyPaths<Tables[StoreName]>,
-  ): Promise<IndexResult> {
-    const result = await this.store(storeName, 'readonly');
-    const index = result.store.index(indexName);
-    return { ...result, index };
-  }
-
-  /**
-   * Dispatches a `DatabaseEvent` on the instance's `EventTarget`
-   */
-  private dispatch(detail: DatabaseEventDetail, broadcast = true) {
-    // console.debug('dispatching event', detail);
-
+  private dispatch(change: StoreChange, broadcast = true) {
     this.eventTarget.dispatchEvent(
-      new CustomEvent<DatabaseEventDetail>('changed', {
-        detail,
-      }),
+      new CustomEvent<StoreChange>('changed', { detail: change }),
     );
 
     if (broadcast) {
-      this.broadcastChannel?.postMessage(detail);
+      this.broadcastChannel?.postMessage(change);
     }
   }
 
@@ -472,7 +346,7 @@ export default class Database<Tables> {
       this.broadcastChannel.onmessage = (event) => {
         // console.debug('received broadcast', event.data);
 
-        this.dispatch(event.data as DatabaseEventDetail, false);
+        this.dispatch(event.data as StoreChange, false);
       };
     }
   }
@@ -497,35 +371,3 @@ export const deleteDatabase = (name: string): Promise<void> => {
     request.onsuccess = () => resolve();
   });
 };
-
-export type DatabaseEventDetail =
-  | {
-      type: 'created';
-      storeName: string;
-      obj: unknown;
-    }
-  | {
-      type: 'createdMany';
-      storeName: string;
-      objs: unknown[];
-    }
-  | {
-      type: 'updated';
-      storeName: string;
-      obj: unknown;
-    }
-  | {
-      type: 'deleted';
-      storeName: string;
-      key: Key;
-    };
-
-export type DatabaseEvent = CustomEvent<DatabaseEventDetail>;
-
-type StoreResult = {
-  db: IDBDatabase;
-  transaction: IDBTransaction;
-  store: IDBObjectStore;
-};
-
-type IndexResult = StoreResult & { index: IDBIndex };

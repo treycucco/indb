@@ -1,7 +1,7 @@
-import Database, { deleteDatabase } from '../src//database';
-import type { DatabaseEventDetail } from '../src/database';
 import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
 import type { Tables } from '../test/fixtures';
+import type { StoreChange } from './change';
+import Database, { deleteDatabase } from './database';
 import type { Mock } from 'vitest';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -27,12 +27,12 @@ describe(Database, () => {
   });
 
   const assertChangeHandlerCall = async (
-    detail: DatabaseEventDetail,
+    change: StoreChange,
     callIndex = 0,
   ) => {
     // TODO: Need a waitFor type helper?
     expect(changeHandler).toHaveBeenCalledTimes(1);
-    expect(changeHandler.mock.calls[callIndex][0].detail).toEqual(detail);
+    expect(changeHandler.mock.calls[callIndex][0].detail).toEqual(change);
   };
 
   describe('get', () => {
@@ -113,9 +113,8 @@ describe(Database, () => {
       expect(await db.get('users', 100)).toEqual(newUser);
 
       await assertChangeHandlerCall({
-        type: 'created',
         storeName: 'users',
-        obj: newUser,
+        created: [newUser],
       });
     });
 
@@ -126,9 +125,8 @@ describe(Database, () => {
       expect(await db.get('users', 1)).toEqual(updatedUser);
 
       await assertChangeHandlerCall({
-        type: 'created',
         storeName: 'users',
-        obj: updatedUser,
+        created: [updatedUser],
       });
     });
   });
@@ -144,9 +142,8 @@ describe(Database, () => {
       expect(await db.get('users', 100)).toEqual(newUser);
 
       await assertChangeHandlerCall({
-        type: 'createdMany',
         storeName: 'users',
-        objs: [updatedUser, newUser],
+        created: [updatedUser, newUser],
       });
     });
   });
@@ -164,9 +161,8 @@ describe(Database, () => {
       });
 
       await assertChangeHandlerCall({
-        type: 'updated',
         storeName: 'users',
-        obj: updatedUser,
+        updated: [updatedUser],
       });
     });
 
@@ -188,9 +184,8 @@ describe(Database, () => {
       expect(await db.get('users', 100)).toEqual(newUser);
 
       await assertChangeHandlerCall({
-        type: 'created',
         storeName: 'users',
-        obj: newUser,
+        created: [newUser],
       });
     });
 
@@ -201,9 +196,8 @@ describe(Database, () => {
       expect(await db.get('users', 1)).toEqual(updatedUser);
 
       await assertChangeHandlerCall({
-        type: 'updated',
         storeName: 'users',
-        obj: updatedUser,
+        updated: [updatedUser],
       });
     });
   });
@@ -215,9 +209,8 @@ describe(Database, () => {
       expect(await db.get('users', 1)).toBeUndefined();
 
       await assertChangeHandlerCall({
-        type: 'deleted',
         storeName: 'users',
-        key: 1,
+        deleted: [1],
       });
     });
 
@@ -225,9 +218,8 @@ describe(Database, () => {
       await db.delete('users', 100);
 
       await assertChangeHandlerCall({
-        type: 'deleted',
         storeName: 'users',
-        key: 100,
+        deleted: [100],
       });
     });
   });
