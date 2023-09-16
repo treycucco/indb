@@ -10,7 +10,7 @@ import type {
 } from '@indb/database';
 import { getKeyPathValue } from '@indb/database';
 
-export interface BaseSliceArgs<
+export interface SliceArgs<
   Tables extends object,
   StoreName extends StoreNames<Tables>,
 > {
@@ -48,7 +48,7 @@ export default class Slice<
     storeName,
     compare,
     index,
-  }: BaseSliceArgs<Tables, StoreName>) {
+  }: SliceArgs<Tables, StoreName>) {
     this.changeConnector = new DatabaseChangeConnector(database);
     this.database = database;
     this.storeName = storeName;
