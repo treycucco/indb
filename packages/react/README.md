@@ -2,7 +2,7 @@
 
 The react package provides a `createStore` method that returns a `Database`
 instance and several hooks for working with stores from
-[@indb/stores](../stores).
+[@indb/stores](https://www.npmjs.com/package/@indb/stores).
 
 ## Example
 

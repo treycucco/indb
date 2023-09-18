@@ -121,5 +121,5 @@ directly:
 const snapshot = useSyncExternalStore(slice.subscribe, slice.getSnapshot);
 ```
 
-The [react package](../react) provides some ready-made hooks for working with
-slices and counters.
+The [react package](https://www.npmjs.com/package/@indb/react) provides some
+ready-made hooks for working with slices and counters.

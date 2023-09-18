@@ -1,6 +1,6 @@
 {
   "name": "@indb/database",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
@@ -23,6 +23,10 @@
   ],
   "author": "Trey Cucco <fcucco@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/treycucco/indb"
+  },
   "exports": {
     ".": {
       "import": {

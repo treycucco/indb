@@ -87,6 +87,6 @@ So, `Database` instances act as event aggregators for all other `Database`
 instances, meaning that changes in other tabs or windows will dispatch events in
 others, allowing data to keep up to date no matter where the actions occur.
 
-The [stores package](../stores) provides some classes that are designed to
-efficiently keep in-memory representations of parts of the database by using
-this event dispatching functionality.
+The [stores package](https://www.npmjs.com/packages/@indb/stores) provides some
+classes that are designed to efficiently keep in-memory representations of parts
+of the database by using this event dispatching functionality.
