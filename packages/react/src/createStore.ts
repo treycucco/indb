@@ -8,7 +8,7 @@ import type {
 } from '@indb/database';
 import { Counter, Slice } from '@indb/stores';
 import type { Comparer, IndexFilter } from '@indb/stores';
-import { createContext, useCallback, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { useSyncExternalStore } from 'use-sync-external-store/shim';
 
 /**
@@ -54,53 +54,7 @@ const createStore = <Tables extends object>(
 
     const data = useSyncExternalStore(slice.subscribe, slice.getSnapshot);
 
-    const addMany = useCallback(
-      (objs: Array<Tables[StoreName]>) => {
-        return database.putMany(storeName, objs);
-      },
-      [storeName],
-    );
-
-    const add = useCallback(
-      (obj: Tables[StoreName]) => {
-        // We do not need to update the collection here. After the database makes its update it will
-        // dispatch an event which we subscribe to to make collection changes.
-        return database.put(storeName, obj);
-      },
-      [storeName],
-    );
-
-    /**
-     * Update an object in the underlying database.
-     */
-    const update = useCallback(
-      (key: Key, updates: Partial<Tables[StoreName]>) => {
-        // We do not need to update the collection here. After the database makes its update it will
-        // dispatch an event which we subscribe to to make collection changes.
-        return database.update(storeName, key, updates);
-      },
-      [storeName],
-    );
-
-    /**
-     * Delete an object in the underlying database.
-     */
-    const remove = useCallback(
-      (key: Key) => {
-        // We do not need to update the collection here. After the database makes its update it will
-        // dispatch an event which we subscribe to to make collection changes.
-        return database.delete(storeName, key);
-      },
-      [storeName],
-    );
-
-    return {
-      data,
-      addMany,
-      add,
-      update,
-      remove,
-    };
+    return data;
   };
 
   const useCount = <StoreName extends StoreNames<Tables>>(

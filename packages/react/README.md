@@ -34,9 +34,9 @@ const SCHEMA: SchemaDefinition<Tables> = {
   },
 };
 
-const { useSlice } = createStore<Tables>(DATABASE_NAME, SCHEMA);
+const { database, useSlice } = createStore<Tables>(DATABASE_NAME, SCHEMA);
 
-export { useSlice };
+export { database, useSlice };
 ```
 
 `UsersList.tsx`
@@ -51,21 +51,12 @@ const compareUsers = (left: User, right: User) => {
 };
 
 const UsersList = () => {
-  const {
-    data: { ids: userIds, index: usersIndex },
-    update,
-    remove,
-  } = useSlice('users', compareUsers);
+  const { ids: userIds, index: usersIndex } = useSlice('users', compareUsers);
 
   return (
     <>
       {userIds.map((userId) => (
-        <UserListItem
-          user={usersIndex[userId]!}
-          onUpdate={update}
-          onDelete={remover}
-          key={userId}
-        />
+        <UserListItem user={usersIndex[userId]!} key={userId} />
       ))}
     </>
   );

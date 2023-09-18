@@ -75,16 +75,14 @@ describe(createStore, () => {
           store.useSlice('users', compareUsers),
         );
 
-        await waitFor(() =>
-          expect(result.current.data.index).toEqual(USERS_INDEX),
-        );
+        await waitFor(() => expect(result.current.index).toEqual(USERS_INDEX));
 
         const newUser = { id: 10, firstName: 'A', lastName: 'Z' };
 
         await store.database.put('users', newUser);
 
         await waitFor(() =>
-          expect(result.current.data.index).toEqual({
+          expect(result.current.index).toEqual({
             ...USERS_INDEX,
             [newUser.id]: newUser,
           }),
@@ -92,9 +90,7 @@ describe(createStore, () => {
 
         await store.database.delete('users', newUser.id);
 
-        await waitFor(() =>
-          expect(result.current.data.index).toEqual(USERS_INDEX),
-        );
+        await waitFor(() => expect(result.current.index).toEqual(USERS_INDEX));
       });
     });
 
@@ -112,16 +108,14 @@ describe(createStore, () => {
           bUsers.map((user) => [user.id, user]),
         );
 
-        await waitFor(() =>
-          expect(result.current.data.index).toEqual(bUserIndex),
-        );
+        await waitFor(() => expect(result.current.index).toEqual(bUserIndex));
 
         const newUser = { id: 10, firstName: 'Z', lastName: 'B' };
 
         await store.database.put('users', newUser);
 
         await waitFor(() =>
-          expect(result.current.data.index).toEqual({
+          expect(result.current.index).toEqual({
             ...bUserIndex,
             [newUser.id]: newUser,
           }),
@@ -129,9 +123,7 @@ describe(createStore, () => {
 
         await store.database.delete('users', newUser.id);
 
-        await waitFor(() =>
-          expect(result.current.data.index).toEqual(bUserIndex),
-        );
+        await waitFor(() => expect(result.current.index).toEqual(bUserIndex));
       });
     });
   });
