@@ -91,6 +91,18 @@ export default class Slice<
   };
 
   /**
+   * Returns the collection data.
+   *
+   * This is declared as an arrow function so it can be passed directly to `useSyncExternalStore`;
+   */
+  getSnapshot = () => {
+    // React requires that repeated calls to `getSnapshot` return the same object (determined
+    // by `Object.is`) until the `subscribe` callback has been called. The collection implements
+    // caching on its `toData` method to handle this.
+    return this.collection.toData();
+  };
+
+  /**
    * This is an event handler for `Database` changed events. It will use the information in the
    * handler to keep the `Collectionn` synchronized.
    */
@@ -106,55 +118,24 @@ export default class Slice<
       return;
     }
 
-    switch (detail.type) {
-      case 'created':
-      case 'updated':
-        this.addToCollection(detail.obj as Tables[StoreName]);
-        break;
-      case 'createdMany':
-        this.addManyToCollection(detail.objs as Array<Tables[StoreName]>);
-        break;
-      case 'deleted':
-        this.removeFromCollection(detail.key);
-        break;
-      default:
-        throw new Error('Unhandled event type');
-    }
-  }
+    let changed = false;
 
-  /**
-   * Check to see if an item is in the index. If we are not working against an index then all items
-   * will return true.
-   */
-  protected isInIndex(obj: Tables[StoreName]): boolean {
-    if (!this.index) {
-      return true;
+    if (
+      detail.created &&
+      this.addToCollection(detail.created as Array<Tables[StoreName]>)
+    ) {
+      changed = true;
+    }
+    if (
+      detail.updated &&
+      this.addToCollection(detail.updated as Array<Tables[StoreName]>)
+    ) {
+      changed = true;
+    }
+    if (detail.deleted && this.removeFromCollection(detail.deleted)) {
+      changed = true;
     }
 
-    if (obj instanceof Object) {
-      return getKeyPathValue(obj, this.index.path) === this.index.value;
-    }
-
-    return false;
-  }
-
-  /**
-   * Returns the collection data.
-   *
-   * This is declared as an arrow function so it can be passed directly to `useSyncExternalStore`;
-   */
-  getSnapshot = () => {
-    // React requires that repeated calls to `getSnapshot` return the same object (determined
-    // by `Object.is`) until the `subscribe` callback has been called. The collection implements
-    // caching on its `toData` method to handle this.
-    return this.collection.toData();
-  };
-
-  /**
-   * Add an item to the collection and dispatch a `changed` event.
-   */
-  private addToCollection(obj: Tables[StoreName]) {
-    const changed = this.changeInCollection(obj);
     if (changed) {
       this.changeConnector.dispatchChanged();
     }
@@ -163,23 +144,23 @@ export default class Slice<
   /**
    * Add many items to the collection and dispatch a `changed` event.
    */
-  private addManyToCollection(objs: Array<Tables[StoreName]>) {
-    const changed = objs
-      .map((obj) => this.changeInCollection(obj))
-      .some(Boolean);
-    if (changed) {
-      this.changeConnector.dispatchChanged();
-    }
+  private addToCollection(objs: Array<Tables[StoreName]>) {
+    return objs.map((obj) => this.changeInCollection(obj)).some(Boolean);
   }
 
   /**
    * Remove an item from the collection and dispatch a `changed` event.
    */
-  private removeFromCollection(key: Key) {
-    if (this.collection.has(key)) {
-      this.collection.remove(key);
-      this.changeConnector.dispatchChanged();
-    }
+  private removeFromCollection(keys: Key[]) {
+    return keys
+      .map((key) => {
+        if (this.collection.has(key)) {
+          this.collection.remove(key);
+          return true;
+        }
+        return false;
+      })
+      .some(Boolean);
   }
 
   /**
@@ -218,5 +199,21 @@ export default class Slice<
 
     this.collection.add(obj);
     return true;
+  }
+
+  /**
+   * Check to see if an item is in the index. If we are not working against an index then all items
+   * will return true.
+   */
+  private isInIndex(obj: Tables[StoreName]): boolean {
+    if (!this.index) {
+      return true;
+    }
+
+    if (obj instanceof Object) {
+      return getKeyPathValue(obj, this.index.path) === this.index.value;
+    }
+
+    return false;
   }
 }
