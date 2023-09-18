@@ -118,23 +118,15 @@ export default class Slice<
       return;
     }
 
-    let changed = false;
-
-    if (
-      detail.created &&
-      this.addToCollection(detail.created as Array<Tables[StoreName]>)
-    ) {
-      changed = true;
-    }
-    if (
-      detail.updated &&
-      this.addToCollection(detail.updated as Array<Tables[StoreName]>)
-    ) {
-      changed = true;
-    }
-    if (detail.deleted && this.removeFromCollection(detail.deleted)) {
-      changed = true;
-    }
+    const changed = detail.changes.reduce((acc, change) => {
+      if (change.type === 'created' || change.type === 'updated') {
+        return this.changeInCollection(change.obj as Tables[StoreName]) || acc;
+      }
+      if (change.type === 'deleted') {
+        return this.removeFromCollection(change.key) || acc;
+      }
+      throw new Error(`Unhandled change type: ${change.type}`);
+    }, false);
 
     if (changed) {
       this.changeConnector.dispatchChanged();
@@ -142,42 +134,14 @@ export default class Slice<
   }
 
   /**
-   * Add many items to the collection and dispatch a `changed` event.
-   */
-  private addToCollection(objs: Array<Tables[StoreName]>) {
-    return objs.map((obj) => this.changeInCollection(obj)).some(Boolean);
-  }
-
-  /**
    * Remove an item from the collection and dispatch a `changed` event.
    */
-  private removeFromCollection(keys: Key[]) {
-    return keys
-      .map((key) => {
-        if (this.collection.has(key)) {
-          this.collection.remove(key);
-          return true;
-        }
-        return false;
-      })
-      .some(Boolean);
-  }
-
-  /**
-   * Get the initial items to use to populate the collection.
-   */
-  private async initializeCollection(): Promise<void> {
-    let items: Array<Tables[StoreName]>;
-
-    if (this.index) {
-      const { path, value } = this.index;
-      items = await this.database.getIndexAll(this.storeName, path, value);
-    } else {
-      items = await this.database.getAll(this.storeName);
+  private removeFromCollection(key: Key) {
+    if (this.collection.has(key)) {
+      this.collection.remove(key);
+      return true;
     }
-
-    this.collection.reset(items);
-    this.changeConnector.dispatchChanged();
+    return false;
   }
 
   /**
@@ -215,5 +179,22 @@ export default class Slice<
     }
 
     return false;
+  }
+
+  /**
+   * Get the initial items to use to populate the collection.
+   */
+  private async initializeCollection(): Promise<void> {
+    let items: Array<Tables[StoreName]>;
+
+    if (this.index) {
+      const { path, value } = this.index;
+      items = await this.database.getIndexAll(this.storeName, path, value);
+    } else {
+      items = await this.database.getAll(this.storeName);
+    }
+
+    this.collection.reset(items);
+    this.changeConnector.dispatchChanged();
   }
 }
