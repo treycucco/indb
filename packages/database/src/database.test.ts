@@ -1,6 +1,6 @@
 import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
-import type { Tables } from '../test/fixtures';
-import type { StoreChange } from './change';
+import type { Tables, User } from '../test/fixtures';
+import type { StoreChanges } from './change';
 import Database, { deleteDatabase } from './database';
 import type { Mock } from 'vitest';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
@@ -27,7 +27,7 @@ describe(Database, () => {
   });
 
   const assertChangeHandlerCall = async (
-    change: StoreChange,
+    change: StoreChanges,
     callIndex = 0,
   ) => {
     // TODO: Need a waitFor type helper?
@@ -114,7 +114,7 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        created: [newUser],
+        changes: [{ type: 'created', obj: newUser }],
       });
     });
 
@@ -126,7 +126,7 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        created: [updatedUser],
+        changes: [{ type: 'created', obj: updatedUser }],
       });
     });
   });
@@ -143,7 +143,10 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        created: [updatedUser, newUser],
+        changes: [
+          { type: 'created', obj: updatedUser },
+          { type: 'created', obj: newUser },
+        ],
       });
     });
   });
@@ -162,7 +165,7 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        updated: [updatedUser],
+        changes: [{ type: 'updated', obj: updatedUser }],
       });
     });
 
@@ -185,7 +188,7 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        created: [newUser],
+        changes: [{ type: 'created', obj: newUser }],
       });
     });
 
@@ -197,7 +200,7 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        updated: [updatedUser],
+        changes: [{ type: 'updated', obj: updatedUser }],
       });
     });
   });
@@ -210,7 +213,7 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        deleted: [1],
+        changes: [{ type: 'deleted', key: 1 }],
       });
     });
 
@@ -219,7 +222,31 @@ describe(Database, () => {
 
       await assertChangeHandlerCall({
         storeName: 'users',
-        deleted: [100],
+        changes: [{ type: 'deleted', key: 100 }],
+      });
+    });
+  });
+
+  describe('transaction', () => {
+    test('fires off all events correctly', async () => {
+      const tx = await db.transaction(['users'], 'readwrite');
+
+      const initialUser: User = { id: 100, firstName: 'Z', lastName: 'T' };
+
+      tx.put('users', initialUser);
+
+      const updatedUser = await tx.update('users', 100, { firstName: 'ZZ' });
+
+      tx.delete('users', 100);
+
+      await tx.promise;
+      await assertChangeHandlerCall({
+        storeName: 'users',
+        changes: [
+          { type: 'created', obj: initialUser },
+          { type: 'updated', obj: updatedUser },
+          { type: 'deleted', key: 100 },
+        ],
       });
     });
   });

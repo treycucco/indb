@@ -63,7 +63,7 @@ export default class Transaction<Tables> {
     indexName: ValidKeyPaths<Tables[StoreName]>,
     key: Key,
   ): Promise<Tables[StoreName] | undefined> {
-    const { index } = await this.index(storeName, indexName);
+    const { index } = this.index(storeName, indexName);
     return this.getFromStoreOrIndex(index, key);
   }
 
@@ -75,7 +75,7 @@ export default class Transaction<Tables> {
     indexName: ValidKeyPaths<Tables[StoreName]>,
     key: Key,
   ): Promise<Array<Tables[StoreName]>> {
-    const { index } = await this.index(storeName, indexName);
+    const { index } = this.index(storeName, indexName);
     const request = index.getAll(key);
 
     return new Promise<Array<Tables[StoreName]>>((resolve, reject) => {
@@ -91,7 +91,7 @@ export default class Transaction<Tables> {
   async getCount<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
   ): Promise<number> {
-    const store = await this.store(storeName);
+    const store = this.store(storeName);
     const request = store.count();
 
     return new Promise<number>((resolve, reject) => {
@@ -108,7 +108,7 @@ export default class Transaction<Tables> {
     indexName: ValidKeyPaths<Tables[StoreName]>,
     key: Key,
   ): Promise<number> {
-    const { index } = await this.index(storeName, indexName);
+    const { index } = this.index(storeName, indexName);
     const request = index.count(key);
 
     return new Promise<number>((resolve, reject) => {
@@ -172,7 +172,7 @@ export default class Transaction<Tables> {
     key: Key,
     updates: Partial<Tables[StoreName]>,
   ): Promise<Tables[StoreName] | undefined> {
-    const store = await this.store(storeName);
+    const store = this.store(storeName);
 
     const obj = await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(
       store,
@@ -229,11 +229,8 @@ export default class Transaction<Tables> {
    *
    * Dispatches the 'deleted' event whether or not the object existed in the store.
    */
-  async delete<StoreName extends StoreNames<Tables>>(
-    storeName: StoreName,
-    key: Key,
-  ): Promise<void> {
-    const store = await this.store(storeName);
+  delete<StoreName extends StoreNames<Tables>>(storeName: StoreName, key: Key) {
+    const store = this.store(storeName);
 
     store.delete(key);
 

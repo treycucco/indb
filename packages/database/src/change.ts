@@ -4,51 +4,36 @@ export type TransactionChange =
   | { type: 'created' | 'updated'; storeName: string; obj: unknown }
   | { type: 'deleted'; storeName: string; key: Key };
 
-export type StoreChange = {
+export type StoreChange =
+  | { type: 'created' | 'updated'; obj: unknown }
+  | { type: 'deleted'; key: Key };
+
+export type StoreChanges = {
   storeName: string;
-  created?: unknown[];
-  updated?: unknown[];
-  deleted?: Key[];
+  changes: StoreChange[];
 };
 
 export const mapTransactionChangesToStoreChanges = (
   transactionChanges: TransactionChange[],
-): StoreChange[] => {
-  const storeChangeMap = new Map<string, StoreChange>();
+): StoreChanges[] => {
+  const storeChangeMap = new Map<string, StoreChanges>();
 
   for (const transactionChange of transactionChanges) {
-    const { storeName, type } = transactionChange;
-    let storeChange = storeChangeMap.get(storeName);
+    const { type, storeName } = transactionChange;
+    let storeChanges = storeChangeMap.get(storeName);
 
-    if (!storeChange) {
-      storeChange = { storeName };
-      storeChangeMap.set(storeName, storeChange);
+    if (!storeChanges) {
+      storeChanges = { storeName, changes: [] };
+      storeChangeMap.set(storeName, storeChanges);
     }
 
     switch (type) {
       case 'created':
-        {
-          if (!storeChange.created) {
-            storeChange.created = [];
-          }
-          storeChange.created.push(transactionChange.obj);
-        }
-        break;
       case 'updated':
-        {
-          if (!storeChange.updated) {
-            storeChange.updated = [];
-          }
-          storeChange.updated.push(transactionChange.obj);
-        }
+        storeChanges.changes.push({ type, obj: transactionChange.obj });
         break;
       case 'deleted':
-        {
-          if (!storeChange.deleted) {
-            storeChange.deleted = [];
-          }
-          storeChange.deleted.push(transactionChange.key);
-        }
+        storeChanges.changes.push({ type, key: transactionChange.key });
         break;
       default:
         throw new Error(`Unhandled TransactionChange type: ${type}`);

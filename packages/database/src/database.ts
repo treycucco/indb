@@ -1,4 +1,4 @@
-import type { StoreChange, TransactionChange } from './change';
+import type { StoreChanges, TransactionChange } from './change';
 import { mapTransactionChangesToStoreChanges } from './change';
 import { getKeyPathValue } from './keyPath';
 import type { Key, KeyExtractor, ValidKeyPaths } from './keyPath';
@@ -6,7 +6,7 @@ import type { SchemaDefinition, StoreNames } from './schema';
 import { migrateSchema } from './schema';
 import Transaction from './transaction';
 
-export type DatabaseEvent = CustomEvent<StoreChange>;
+export type DatabaseEvent = CustomEvent<StoreChanges>;
 
 /**
  * This class provides a convenient (thought limited) API on top of IndexedDB.
@@ -327,13 +327,13 @@ export default class Database<Tables> {
     storeChanges.forEach((storeChange) => this.dispatch(storeChange));
   }
 
-  private dispatch(change: StoreChange, broadcast = true) {
+  private dispatch(data: StoreChanges, broadcast = true) {
     this.eventTarget.dispatchEvent(
-      new CustomEvent<StoreChange>('changed', { detail: change }),
+      new CustomEvent<StoreChanges>('changed', { detail: data }),
     );
 
     if (broadcast) {
-      this.broadcastChannel?.postMessage(change);
+      this.broadcastChannel?.postMessage(data);
     }
   }
 
@@ -344,9 +344,7 @@ export default class Database<Tables> {
     if (!this.broadcastChannel && 'BroadcastChannel' in globalThis) {
       this.broadcastChannel = new BroadcastChannel(`IndexedDB:${this.name}`);
       this.broadcastChannel.onmessage = (event) => {
-        // console.debug('received broadcast', event.data);
-
-        this.dispatch(event.data as StoreChange, false);
+        this.dispatch(event.data as StoreChanges, false);
       };
     }
   }
