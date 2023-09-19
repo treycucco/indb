@@ -10,6 +10,7 @@
   "workspaces": [
     "packages/database",
     "packages/stores",
-    "packages/react"
+    "packages/react",
+    "packages/preact"
   ]
 }

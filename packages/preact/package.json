@@ -1,0 +1,67 @@
+{
+  "name": "@indb/preact",
+  "version": "0.2.3",
+  "description": "",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "types": "./lib/esm/types/index.d.ts",
+  "scripts": {
+    "build": "npm run check && npm run clean && npm run build:esm && npm run build:cjs",
+    "build:cjs": "tsc -b ./configs/tsconfig.cjs.json",
+    "build:esm": "tsc -b ./configs/tsconfig.esm.json",
+    "check": "npm run test:typecheck && npm run test:prettier && npm run test:eslint && npm run test",
+    "clean": "rm -rf ./lib",
+    "prettier:fix": "prettier --write src/ test/",
+    "test": "vitest --run",
+    "test:eslint": "eslint src/ test/",
+    "test:prettier": "prettier --check src/ test/",
+    "test:typecheck": "tsc",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "IndexedDB",
+    "Preact",
+    "Preact Hooks"
+  ],
+  "author": "Trey Cucco <fcucco@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/treycucco/indb"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.js"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "./lib/**/*"
+  ],
+  "dependencies": {
+    "@indb/database": "^0.2.3",
+    "@indb/stores": "^0.2.3"
+  },
+  "devDependencies": {
+    "@testing-library/preact": "^3.2.3",
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.49.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "fake-indexeddb": "^4.0.2",
+    "preact": "^10.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.4"
+  },
+  "peerDependencies": {
+    "preact": ">= 10.0.0"
+  }
+}

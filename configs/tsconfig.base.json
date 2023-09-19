@@ -24,6 +24,7 @@
   "references": [
     { "path": "../packages/database" },
     { "path": "../packages/store" },
-    { "path": "../packages/react" }
+    { "path": "../packages/react" },
+    { "path": "../packages/preact" }
   ]
 }
