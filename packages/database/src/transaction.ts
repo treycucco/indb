@@ -120,7 +120,7 @@ export default class Transaction<Tables> {
   /**
    * Gets an object by key from an object store.
    */
-  private getFromStoreOrIndex<ObjectType, KeyType extends Key>(
+  private async getFromStoreOrIndex<ObjectType, KeyType extends Key>(
     storeOrIndex: IDBObjectStore | IDBIndex,
     key: KeyType,
   ): Promise<ObjectType | undefined> {
@@ -145,13 +145,14 @@ export default class Transaction<Tables> {
    * the object exists or not, and you want to get an event based on whether or not it exists, use
    * the `upsert` method.
    */
-  put<StoreName extends StoreNames<Tables>>(
+  async put<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     obj: Tables[StoreName],
-  ) {
+    key?: Key,
+  ): Promise<void> {
     const store = this.store(storeName);
 
-    store.put(obj);
+    store.put(obj, key);
 
     this._changes.push({
       type: 'created',
@@ -229,7 +230,10 @@ export default class Transaction<Tables> {
    *
    * Dispatches the 'deleted' event whether or not the object existed in the store.
    */
-  delete<StoreName extends StoreNames<Tables>>(storeName: StoreName, key: Key) {
+  async delete<StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+    key: Key,
+  ): Promise<void> {
     const store = this.store(storeName);
 
     store.delete(key);

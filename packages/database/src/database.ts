@@ -218,10 +218,11 @@ export default class Database<Tables> {
   async put<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     obj: Tables[StoreName],
+    key?: Key,
   ): Promise<void> {
     const transaction = await this.transaction([storeName], 'readwrite');
 
-    transaction.put(storeName, obj);
+    transaction.put(storeName, obj, key);
 
     return transaction.promise;
   }
