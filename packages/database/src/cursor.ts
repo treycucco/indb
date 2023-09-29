@@ -34,6 +34,10 @@ export default class Cursor<Tables, StoreName extends StoreNames<Tables>>
       IteratorResult<CursorIteratorValue<Tables[StoreName]>>
     >();
 
+    // the onsuccess handler is called after creating the cursor, and then again every time
+    // `continue` is called. In `next` we will create a new deferred and call continue, and then
+    // once the value is ready this handler will be called and will resolve on the deferred that
+    // was returned from `next` after calling `continue.
     request.onsuccess = () => {
       this.cursor = request.result;
 
