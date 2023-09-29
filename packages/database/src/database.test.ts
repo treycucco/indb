@@ -2,6 +2,7 @@ import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
 import type { Tables, User } from '../test/fixtures';
 import type { StoreChanges } from './change';
 import Database, { deleteDatabase } from './database';
+import type { Key } from './keyPath';
 import type { Mock } from 'vitest';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -30,7 +31,6 @@ describe(Database, () => {
     change: StoreChanges,
     callIndex = 0,
   ) => {
-    // TODO: Need a waitFor type helper?
     expect(changeHandler).toHaveBeenCalledTimes(1);
     expect(changeHandler.mock.calls[callIndex][0].detail).toEqual(change);
   };
@@ -88,6 +88,83 @@ describe(Database, () => {
       const users = await db.getIndexAll('users', 'favorite.color', 'purple');
 
       expect(users).toEqual([]);
+    });
+  });
+
+  describe('iterate', () => {
+    test('iterates all items in the table', async () => {
+      const users: User[] = [];
+      const { iterator } = await db.iterate('users');
+
+      for await (const value of iterator) {
+        users.push(value.obj);
+      }
+
+      expect(Object.fromEntries(users.map((user) => [user.id, user]))).toEqual(
+        USERS_INDEX,
+      );
+    });
+
+    test('raises events for updated people', async () => {
+      const { iterator, promise } = await db.iterate('users');
+      const updates: User[] = [];
+
+      for await (const value of iterator) {
+        if (value.obj.firstName === 'A') {
+          updates.push(value.update({ firstName: 'Z' }));
+        }
+      }
+
+      await promise;
+
+      expect(updates).toHaveLength(5);
+      assertChangeHandlerCall({
+        storeName: 'users',
+        changes: updates.map((update) => ({ type: 'updated', obj: update })),
+      });
+    });
+
+    test('raises events for deleted people', async () => {
+      const { iterator, promise } = await db.iterate('users');
+      const deleted: Key[] = [];
+
+      for await (const value of iterator) {
+        if (value.obj.firstName === 'A') {
+          value.delete();
+          deleted.push(value.key);
+        }
+      }
+
+      await promise;
+
+      expect(deleted).toHaveLength(5);
+      assertChangeHandlerCall({
+        storeName: 'users',
+        changes: deleted.map((key) => ({ type: 'deleted', key })),
+      });
+    });
+  });
+
+  describe('iterateIndex', () => {
+    test('iterates all items in an index key', async () => {
+      const users: User[] = [];
+      const { iterator } = await db.iterateIndex(
+        'users',
+        'favorite.color',
+        'blue',
+      );
+
+      for await (const value of iterator) {
+        users.push(value.obj);
+      }
+
+      expect(Object.fromEntries(users.map((user) => [user.id, user]))).toEqual(
+        Object.fromEntries(
+          USERS_LIST.filter((user) => user.favorite?.color === 'blue').map(
+            (user) => [user.id, user],
+          ),
+        ),
+      );
     });
   });
 

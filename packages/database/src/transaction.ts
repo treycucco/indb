@@ -1,4 +1,6 @@
 import type { TransactionChange } from './change';
+import Cursor from './cursor';
+import type { CursorIteratorValue } from './cursor';
 import Deferred from './deferred';
 import type { Key, ValidKeyPaths } from './keyPath';
 import type { StoreNames } from './schema';
@@ -86,6 +88,32 @@ export default class Transaction<Tables> {
   }
 
   /**
+   * Returns a Cursor which will iterate over the store.
+   */
+  iterate<StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+  ): AsyncIterable<CursorIteratorValue<Tables[StoreName]>> {
+    const store = this.store(storeName);
+    const request = store.openCursor();
+
+    return new Cursor<Tables, StoreName>(storeName, this.onChange, request);
+  }
+
+  /**
+   * Returns a Cursor which will iterate over the index for a key.
+   */
+  iterateIndex<StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+    indexName: ValidKeyPaths<Tables[StoreName]>,
+    key: Key,
+  ): AsyncIterable<CursorIteratorValue<Tables[StoreName]>> {
+    const { index } = this.index(storeName, indexName);
+    const request = index.openCursor(key);
+
+    return new Cursor<Tables, StoreName>(storeName, this.onChange, request);
+  }
+
+  /**
    * Get the count of objects in an object store.
    */
   async getCount<StoreName extends StoreNames<Tables>>(
@@ -154,7 +182,7 @@ export default class Transaction<Tables> {
 
     store.put(obj, key);
 
-    this._changes.push({
+    this.onChange({
       type: 'created',
       storeName,
       obj,
@@ -188,7 +216,7 @@ export default class Transaction<Tables> {
 
     store.put(updated);
 
-    this._changes.push({
+    this.onChange({
       type: 'updated',
       storeName,
       obj: updated,
@@ -216,7 +244,7 @@ export default class Transaction<Tables> {
 
     store.put(obj);
 
-    this._changes.push({
+    this.onChange({
       type: exists ? 'updated' : 'created',
       storeName,
       obj,
@@ -238,7 +266,7 @@ export default class Transaction<Tables> {
 
     store.delete(key);
 
-    this._changes.push({
+    this.onChange({
       type: 'deleted',
       storeName,
       key,
@@ -264,4 +292,8 @@ export default class Transaction<Tables> {
 
     return { store, index };
   }
+
+  private onChange = (change: TransactionChange) => {
+    this._changes.push(change);
+  };
 }

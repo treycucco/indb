@@ -1,5 +1,6 @@
 import type { StoreChanges, TransactionChange } from './change';
 import { mapTransactionChangesToStoreChanges } from './change';
+import type { CursorIteratorValue } from './cursor';
 import { getKeyPathValue } from './keyPath';
 import type { Key, KeyExtractor, ValidKeyPaths } from './keyPath';
 import type { SchemaDefinition, StoreNames } from './schema';
@@ -184,6 +185,63 @@ export default class Database<Tables> {
   ): Promise<Array<Tables[StoreName]>> {
     const transaction = await this.transaction([storeName], 'readonly');
     return transaction.getIndexAll(storeName, indexName, key);
+  }
+
+  /**
+   * Returns an object containing a cursor that will iterate over the store, and a promise that
+   * will resolve once all updates or deletes done via the iterator have resolved.
+   *
+   * Usage when not making changes:
+   *
+   * `for await (const { obj } of (await db.iterate(tableName)).iterator) { ... }`
+   *
+   * Usage when making changes:
+   *
+   * ```
+   * const { iterator, promise } = await db.iterate(tableName);
+   *
+   * for await (const value of iterator) {
+   *   if (shouldDelete(value.obj)) {
+   *     value.delete();
+   *   }
+   * }
+   *
+   * await promise; // This will resolve after all deletes have been commited.
+   */
+  async iterate<StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+  ): Promise<{
+    iterator: AsyncIterable<CursorIteratorValue<Tables[StoreName]>>;
+    promise: Promise<void>;
+  }> {
+    const transaction = await this.transaction([storeName], 'readwrite');
+    const iterator = transaction.iterate(storeName);
+
+    return {
+      iterator,
+      promise: transaction.promise,
+    };
+  }
+
+  /**
+   * Returns an object containing a cursor that will iterate over the index for a key, and a
+   * promise that will resolve once all updates or deletes done via the iterator have resolved.
+   */
+  async iterateIndex<StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+    indexName: ValidKeyPaths<Tables[StoreName]>,
+    key: Key,
+  ): Promise<{
+    iterator: AsyncIterable<CursorIteratorValue<Tables[StoreName]>>;
+    promise: Promise<void>;
+  }> {
+    const transaction = await this.transaction([storeName], 'readwrite');
+    const iterator = transaction.iterateIndex(storeName, indexName, key);
+
+    return {
+      iterator,
+      promise: transaction.promise,
+    };
   }
 
   /**
