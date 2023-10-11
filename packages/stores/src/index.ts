@@ -1,4 +1,4 @@
-export type { Comparer, IndexFilter } from './types';
+export type { Comparer, IndexFilter, Predicate } from './types';
 export type { CollectionData } from './collection';
 export { default as Counter } from './counter';
 export { default as DatabaseChangeConnector } from './databaseChangeConnector';

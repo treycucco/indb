@@ -1,5 +1,6 @@
 import DatabaseChangeConnector from './databaseChangeConnector';
-import type { IndexFilter } from './types';
+import type { IndexFilter, Predicate } from './types';
+import { filteredCountFromCursor } from './utils';
 import type { Database, DatabaseEvent, StoreNames } from '@indb/database';
 
 type CounterArgs<
@@ -9,6 +10,7 @@ type CounterArgs<
   database: Database<Tables>;
   storeName: StoreName;
   index?: IndexFilter<Tables, StoreName>;
+  filter?: Predicate<Tables[StoreName]>;
 };
 
 /**
@@ -29,13 +31,20 @@ export default class Counter<
   private readonly database: Database<Tables>;
   private readonly storeName: StoreName;
   private readonly index: IndexFilter<Tables, StoreName> | undefined;
+  private readonly filter: Predicate<Tables[StoreName]> | null;
   private count: number | undefined = undefined;
 
-  constructor({ database, storeName, index }: CounterArgs<Tables, StoreName>) {
+  constructor({
+    database,
+    storeName,
+    index,
+    filter,
+  }: CounterArgs<Tables, StoreName>) {
     this.changeConnector = new DatabaseChangeConnector(database);
     this.database = database;
     this.storeName = storeName;
     this.index = index;
+    this.filter = filter ?? null;
   }
 
   /**
@@ -102,13 +111,29 @@ export default class Counter<
     let nextCount: number;
 
     if (this.index) {
-      nextCount = await this.database.getIndexCount(
-        this.storeName,
-        this.index.path,
-        this.index.value,
-      );
+      const { path, value } = this.index;
+      if (this.filter) {
+        nextCount = await filteredCountFromCursor(
+          (await this.database.iterateIndex(this.storeName, path, value))
+            .iterator,
+          this.filter,
+        );
+      } else {
+        nextCount = await this.database.getIndexCount(
+          this.storeName,
+          path,
+          value,
+        );
+      }
     } else {
-      nextCount = await this.database.getCount(this.storeName);
+      if (this.filter) {
+        nextCount = await filteredCountFromCursor(
+          (await this.database.iterate(this.storeName)).iterator,
+          this.filter,
+        );
+      } else {
+        nextCount = await this.database.getCount(this.storeName);
+      }
     }
 
     if (nextCount !== this.count) {

@@ -1,6 +1,7 @@
 import Collection from './collection';
 import DatabaseChangeConnector from './databaseChangeConnector';
-import type { Comparer, IndexFilter } from './types';
+import type { Comparer, IndexFilter, Predicate } from './types';
+import { filteredArrayFromCursor } from './utils';
 import type {
   Database,
   DatabaseEvent,
@@ -16,10 +17,9 @@ export interface SliceArgs<
 > {
   database: Database<Tables>;
   storeName: StoreName;
-  compare: Tables[StoreName] extends object
-    ? Comparer<Tables[StoreName]>
-    : never;
+  compare: Comparer<Tables[StoreName]>;
   index?: IndexFilter<Tables, StoreName>;
+  filter?: Predicate<Tables[StoreName]>;
 }
 
 /**
@@ -40,6 +40,7 @@ export default class Slice<
   private readonly storeName: StoreName;
   private readonly database: Database<Tables>;
   private readonly index: IndexFilter<Tables, StoreName> | undefined;
+  private readonly filter: Predicate<Tables[StoreName]> | null;
   private readonly getKey: KeyExtractor<Tables[StoreName]>;
   private readonly collection: Collection<Tables[StoreName]>;
 
@@ -48,11 +49,13 @@ export default class Slice<
     storeName,
     compare,
     index,
+    filter,
   }: SliceArgs<Tables, StoreName>) {
     this.changeConnector = new DatabaseChangeConnector(database);
     this.database = database;
     this.storeName = storeName;
     this.index = index;
+    this.filter = filter ?? null;
     this.getKey = database.getKeyExtractor(storeName);
     this.collection = new Collection(this.getKey, compare, []);
   }
@@ -150,7 +153,7 @@ export default class Slice<
   private changeInCollection(obj: Tables[StoreName]): boolean {
     // If the item is in the collection but its value does not now match the index, remove it from
     // the collection
-    if (!this.isInIndex(obj)) {
+    if (!this.includeItem(obj)) {
       const key = this.getKey(obj);
       const inCollection = this.collection.has(key);
 
@@ -163,6 +166,13 @@ export default class Slice<
 
     this.collection.add(obj);
     return true;
+  }
+
+  /**
+   * Check to see if an item should be included in the slice.
+   */
+  private includeItem(obj: Tables[StoreName]): boolean {
+    return this.isInIndex(obj) && this.passesFilter(obj);
   }
 
   /**
@@ -182,19 +192,46 @@ export default class Slice<
   }
 
   /**
+   * Check to see if an item passes the predicate. If there is no predicate all items pass.
+   */
+  private passesFilter(obj: Tables[StoreName]): boolean {
+    if (!this.filter) {
+      return true;
+    }
+    return this.filter(obj);
+  }
+
+  /**
    * Get the initial items to use to populate the collection.
    */
   private async initializeCollection(): Promise<void> {
-    let items: Array<Tables[StoreName]>;
+    this.collection.reset(await this.getInitialItems());
+    this.changeConnector.dispatchChanged();
+  }
 
+  private async getInitialItems(): Promise<Array<Tables[StoreName]>> {
     if (this.index) {
       const { path, value } = this.index;
-      items = await this.database.getIndexAll(this.storeName, path, value);
+      if (this.filter) {
+        // When using a predicate we will iterate instead of getting all, in case the result set is
+        // very large and the filter reduces that down significantly.
+        return filteredArrayFromCursor(
+          (await this.database.iterateIndex(this.storeName, path, value))
+            .iterator,
+          this.filter,
+        );
+      } else {
+        return this.database.getIndexAll(this.storeName, path, value);
+      }
     } else {
-      items = await this.database.getAll(this.storeName);
+      if (this.filter) {
+        return filteredArrayFromCursor(
+          (await this.database.iterate(this.storeName)).iterator,
+          this.filter,
+        );
+      } else {
+        return this.database.getAll(this.storeName);
+      }
     }
-
-    this.collection.reset(items);
-    this.changeConnector.dispatchChanged();
   }
 }

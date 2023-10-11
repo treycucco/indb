@@ -7,7 +7,7 @@ import type {
   ValidKeyPaths,
 } from '@indb/database';
 import { Counter, Slice } from '@indb/stores';
-import type { Comparer, IndexFilter } from '@indb/stores';
+import type { Comparer, IndexFilter, Predicate } from '@indb/stores';
 import { createContext } from 'preact';
 import { useSyncExternalStore } from 'preact/compat';
 import { useContext } from 'preact/hooks';
@@ -34,10 +34,9 @@ const createStore = <Tables extends object>(
 
   const useSlice = <StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    compare: Tables[StoreName] extends object
-      ? Comparer<Tables[StoreName]>
-      : never,
+    compare: Comparer<Tables[StoreName]>,
     index?: IndexFilter<Tables, StoreName>,
+    filter?: Predicate<Tables[StoreName]>,
   ) => {
     const indexPath = index?.path;
     const indexValue = index?.value;
@@ -48,10 +47,11 @@ const createStore = <Tables extends object>(
         storeName,
         compare,
         index: buildIndexFilter(indexPath, indexValue),
+        filter,
       });
       slice.setup();
       return [slice, () => slice.teardown()];
-    }, [storeName, compare, indexPath, indexValue]);
+    }, [storeName, compare, indexPath, indexValue, filter]);
 
     const data = useSyncExternalStore(slice.subscribe, slice.getSnapshot);
 
@@ -61,6 +61,7 @@ const createStore = <Tables extends object>(
   const useCount = <StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     index?: IndexFilter<Tables, StoreName>,
+    filter?: Predicate<Tables[StoreName]>,
   ) => {
     const indexPath = index?.path;
     const indexValue = index?.value;
@@ -70,10 +71,11 @@ const createStore = <Tables extends object>(
         database,
         storeName,
         index: buildIndexFilter(indexPath, indexValue),
+        filter,
       });
       counter.setup();
       return [counter, () => counter.teardown()];
-    }, [storeName, indexPath, indexValue]);
+    }, [storeName, indexPath, indexValue, filter]);
 
     const count = useSyncExternalStore(counter.subscribe, counter.getSnapshot);
 
