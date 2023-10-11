@@ -12,8 +12,8 @@ functionality of IndexedDB.
 
 ### @indb/database
 
-The database package provides a type-safe, promise-based wrapper around some of
-IndexedDB the most common actions, such as:
+The database package provides a type-safe, promise-based wrapper around 
+IndexedDB for the most common actions, such as:
 
 - Creating a new database
 - Migrating a database
@@ -47,17 +47,19 @@ The stores provided include:
 
 See [the package](./packages/stores) for more information.
 
-### @indb/react
+### @indb/react, @indb/preact
 
-The react package provides a `createStore` method that initializes a database
-and creates hooks that synchronize with stores from the `@indb/stores` package.
+The react and preact packages provide `createStore` methods that initializes a
+database and creates hooks that synchronize with stores from the `@indb/stores`
+package.
 
 For instance, `createStore` returns a `useSlice` hook that uses
 `useSyncExternalStore` to keep a fresh memory representation of an object store.
 
-See [the package](./packages/react) for more information.
+See [the react package](./packages/react) and
+[the preact package](./packages/preact) for more information.
 
 ## Sample Project
 
-See [IndB Todo](https://treycucco.github.io/indb-todo/) for a sample React
+See [InDB Todo](https://treycucco.github.io/indb-todo/) for a sample React
 project that uses this package.
