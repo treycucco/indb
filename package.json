@@ -1,6 +1,6 @@
 {
   "name": "indb",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "@indb is a collection of packages for working with IndexedDB in reactive environments.",
   "keywords": [
     "IndexedDB"

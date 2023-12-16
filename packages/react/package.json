@@ -1,6 +1,6 @@
 {
   "name": "@indb/react",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "",
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
@@ -46,8 +46,8 @@
     "./lib/**/*"
   ],
   "dependencies": {
-    "@indb/database": "^0.2.5",
-    "@indb/stores": "^0.2.5",
+    "@indb/database": "^0.2.6",
+    "@indb/stores": "^0.2.6",
     "use-sync-external-store": "^1.2.0"
   },
   "devDependencies": {
