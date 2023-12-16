@@ -16,7 +16,8 @@
     "test:eslint": "eslint src/ test/",
     "test:prettier": "prettier --check src/ test/",
     "test:typecheck": "tsc",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublish": "build"
   },
   "keywords": [
     "IndexedDB",
