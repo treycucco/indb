@@ -10,7 +10,9 @@ import { Counter, Slice } from '@indb/stores';
 import type { Comparer, IndexFilter, Predicate } from '@indb/stores';
 import { createContext } from 'preact';
 import { useSyncExternalStore } from 'preact/compat';
-import { useContext } from 'preact/hooks';
+import { useContext, useEffect, useState } from 'preact/hooks';
+
+type EntityStatus = 'LOADING' | 'NOT_FOUND' | 'FOUND';
 
 /**
  * Initialize a database, and return methods for working with it via hooks:
@@ -20,6 +22,8 @@ import { useContext } from 'preact/hooks';
  * - useSlice: a hook that will create a Slice and provide its data and methods for working with
  *             the data.
  * - useCount: a hook that will create a Counter and provide its count
+ * - useEntity: a hook that will load up an entity by key. This hook does not follow database
+ *              updates.
  *
  * For most cases you should be able to work directly with the hooks without working with context.
  */
@@ -82,12 +86,39 @@ const createStore = <Tables extends object>(
     return count;
   };
 
+  const useEntity = <StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+    key: Key,
+  ): { status: EntityStatus; entity: Tables[StoreName] | undefined } => {
+    const [status, setStatus] = useState<EntityStatus>('LOADING');
+    const [entity, setEntity] = useState<Tables[StoreName] | undefined>(
+      undefined,
+    );
+
+    useEffect(() => {
+      const load = async () => {
+        const value = await database.get(storeName, key);
+
+        if (value === undefined) {
+          setStatus('NOT_FOUND');
+        } else {
+          setStatus('FOUND');
+          setEntity(value);
+        }
+      };
+      load();
+    }, [storeName, key]);
+
+    return { status, entity };
+  };
+
   return {
     database,
     DatabaseProvider: DatabaseContext.Provider,
     useDatabaseContext,
     useSlice,
     useCount,
+    useEntity,
   };
 };
 

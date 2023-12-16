@@ -127,4 +127,26 @@ describe(createStore, () => {
       });
     });
   });
+
+  describe('useEntity', () => {
+    test('status is FOUND and has entity when found', async () => {
+      const { result } = renderHook(() => store.useEntity('users', 1));
+
+      expect(result.current.status).toBe('LOADING');
+      expect(result.current.entity).toBeUndefined();
+
+      await waitFor(() => expect(result.current.status).toBe('FOUND'));
+      expect(result.current.entity).toEqual(USERS_INDEX[1]);
+    });
+
+    test('status is NOT_FOUND entity when entity not found', async () => {
+      const { result } = renderHook(() => store.useEntity('users', 100));
+
+      expect(result.current.status).toBe('LOADING');
+      expect(result.current.entity).toBeUndefined();
+
+      await waitFor(() => expect(result.current.status).toBe('NOT_FOUND'));
+      expect(result.current.entity).toBe(undefined);
+    });
+  });
 });
