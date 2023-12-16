@@ -17,7 +17,7 @@
     "test:prettier": "prettier --check src/ test/",
     "test:typecheck": "tsc",
     "test:watch": "vitest",
-    "prepublish": "build"
+    "prepublishOnly": "build"
   },
   "keywords": [
     "IndexedDB"
