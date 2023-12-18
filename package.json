@@ -7,6 +7,12 @@
   ],
   "author": "Trey Cucco <fcucco@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "build": "npm run build --ws",
+    "check": "npm run check --ws",
+    "clean": "npm run clean --ws",
+    "publish": "npm run build --ws && npm publish --ws"
+  },
   "workspaces": [
     "packages/database",
     "packages/stores",
