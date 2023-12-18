@@ -26,7 +26,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/treycucco/indb"
+    "url": "git+https://github.com/treycucco/indb.git"
   },
   "exports": {
     ".": {
