@@ -3,12 +3,12 @@
   "version": "0.2.6",
   "description": "",
   "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
+  "module": "./lib/esm/index.mjs",
   "types": "./lib/esm/types/index.d.ts",
   "scripts": {
     "build": "npm run check && npm run clean && npm run build:esm && npm run build:cjs",
     "build:cjs": "tsc -b ./configs/tsconfig.cjs.json",
-    "build:esm": "tsc -b ./configs/tsconfig.esm.json",
+    "build:esm": "tsc -b ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
     "check": "npm run test:typecheck && npm run test:prettier && npm run test:eslint && npm run test",
     "clean": "rm -rf ./lib",
     "prettier:fix": "prettier --write src/ test/",
@@ -34,7 +34,7 @@
     ".": {
       "import": {
         "types": "./lib/esm/types/index.d.ts",
-        "default": "./lib/esm/index.js"
+        "default": "./lib/esm/index.mjs"
       },
       "require": {
         "types": "./lib/cjs/types/index.d.ts",
