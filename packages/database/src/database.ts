@@ -25,7 +25,7 @@ export default class Database<Tables> {
   private db: IDBDatabase | null = null;
   private broadcastChannel: BroadcastChannel | null = null;
   private readonly eventTarget = new EventTarget();
-  private readonly name: string;
+  public readonly name: string;
   private readonly schema: SchemaDefinition<Tables>;
 
   constructor(name: string, schema: SchemaDefinition<Tables>) {
