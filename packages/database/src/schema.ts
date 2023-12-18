@@ -1,4 +1,4 @@
-import type { ValidKeyPaths } from './keyPath';
+import type { ValidKeyPaths } from './keyPath.js';
 
 export type StoreNames<Tables> = Tables extends object
   ? Exclude<keyof Tables, symbol | number>

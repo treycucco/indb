@@ -1,6 +1,6 @@
-export type { Comparer, IndexFilter, Predicate } from './types';
-export type { CollectionData } from './collection';
-export { default as Counter } from './counter';
-export { default as DatabaseChangeConnector } from './databaseChangeConnector';
-export { default as Slice } from './slice';
-export { default as Collection } from './collection';
+export type { Comparer, IndexFilter, Predicate } from './types.js';
+export type { CollectionData } from './collection/index.js';
+export { default as Counter } from './counter.js';
+export { default as DatabaseChangeConnector } from './databaseChangeConnector.js';
+export { default as Slice } from './slice.js';
+export { default as Collection } from './collection/index.js';

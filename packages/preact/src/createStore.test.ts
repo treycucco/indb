@@ -1,11 +1,11 @@
-import type { Tables } from '../test/fixtures';
+import type { Tables } from '../test/fixtures.js';
 import {
   SCHEMA,
   USERS_INDEX,
   USERS_LIST,
   compareUsers,
-} from '../test/fixtures';
-import createStore from './createStore';
+} from '../test/fixtures.js';
+import createStore from './createStore.js';
 import { deleteDatabase } from '@indb/database';
 import { renderHook, waitFor } from '@testing-library/preact';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';

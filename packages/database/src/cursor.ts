@@ -1,7 +1,7 @@
-import type { TransactionChange } from './change';
-import Deferred from './deferred';
-import type { Key } from './keyPath';
-import type { StoreNames } from './schema';
+import type { TransactionChange } from './change.js';
+import Deferred from './deferred.js';
+import type { Key } from './keyPath.js';
+import type { StoreNames } from './schema.js';
 
 export type CursorIteratorValue<T> = {
   obj: T;

@@ -3,8 +3,8 @@ import {
   USERS_LIST,
   compareUsers,
   getUserKey,
-} from '../../test/fixtures';
-import Collection from './index';
+} from '../../test/fixtures.js';
+import Collection from './index.js';
 import { describe, expect, test } from 'vitest';
 
 describe(Collection, () => {

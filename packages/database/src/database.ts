@@ -1,11 +1,11 @@
-import type { StoreChanges, TransactionChange } from './change';
-import { mapTransactionChangesToStoreChanges } from './change';
-import type { CursorIteratorValue } from './cursor';
-import { getKeyPathValue } from './keyPath';
-import type { Key, KeyExtractor, ValidKeyPaths } from './keyPath';
-import type { SchemaDefinition, StoreNames } from './schema';
-import { migrateSchema } from './schema';
-import Transaction from './transaction';
+import type { StoreChanges, TransactionChange } from './change.js';
+import { mapTransactionChangesToStoreChanges } from './change.js';
+import type { CursorIteratorValue } from './cursor.js';
+import { getKeyPathValue } from './keyPath.js';
+import type { Key, KeyExtractor, ValidKeyPaths } from './keyPath.js';
+import type { SchemaDefinition, StoreNames } from './schema.js';
+import { migrateSchema } from './schema.js';
+import Transaction from './transaction.js';
 
 export type DatabaseEvent = CustomEvent<StoreChanges>;
 

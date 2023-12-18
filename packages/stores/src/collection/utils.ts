@@ -1,4 +1,4 @@
-import type { Comparer } from '../types';
+import type { Comparer } from '../types.js';
 
 /**
  * Uses a binary search to find the insert index for an item in an array.

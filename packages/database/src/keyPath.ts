@@ -1,4 +1,4 @@
-import type { PathType, PathsToProps } from './types';
+import type { PathType, PathsToProps } from './types.js';
 
 /**
  * Accepted types for store and index key paths.

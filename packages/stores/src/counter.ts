@@ -1,6 +1,6 @@
-import DatabaseChangeConnector from './databaseChangeConnector';
-import type { IndexFilter, Predicate } from './types';
-import { filteredCountFromCursor } from './utils';
+import DatabaseChangeConnector from './databaseChangeConnector.js';
+import type { IndexFilter, Predicate } from './types.js';
+import { filteredCountFromCursor } from './utils.js';
 import type { Database, DatabaseEvent, StoreNames } from '@indb/database';
 
 type CounterArgs<

@@ -1,4 +1,4 @@
-import type { Key } from './keyPath';
+import type { Key } from './keyPath.js';
 
 export type TransactionChange =
   | { type: 'created' | 'updated'; storeName: string; obj: unknown }

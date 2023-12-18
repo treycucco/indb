@@ -1,4 +1,4 @@
-import useLifecycleMemo from './useLifecycleMemo';
+import useLifecycleMemo from './useLifecycleMemo.js';
 import { Database } from '@indb/database';
 import type {
   Key,

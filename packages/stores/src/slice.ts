@@ -1,7 +1,7 @@
-import Collection from './collection';
-import DatabaseChangeConnector from './databaseChangeConnector';
-import type { Comparer, IndexFilter, Predicate } from './types';
-import { filteredArrayFromCursor } from './utils';
+import Collection from './collection/index.js';
+import DatabaseChangeConnector from './databaseChangeConnector.js';
+import type { Comparer, IndexFilter, Predicate } from './types.js';
+import { filteredArrayFromCursor } from './utils.js';
 import type {
   Database,
   DatabaseEvent,

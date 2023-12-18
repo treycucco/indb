@@ -43,7 +43,7 @@ export { database, useSlice };
 
 ```tsx
 import UserListItem from './UserListItem';
-import { type User, useSlice } from './store.ts';
+import { type User, useSlice } from './store';
 
 const compareUsers = (left: User, right: User) => {
   const comp = left.lastName.localeCompare(right.lastName);

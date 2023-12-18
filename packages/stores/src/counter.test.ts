@@ -1,7 +1,7 @@
-import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
-import type { Tables } from '../test/fixtures';
-import { waitFor } from '../test/utils';
-import Counter from './counter';
+import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures.js';
+import type { Tables } from '../test/fixtures.js';
+import { waitFor } from '../test/utils.js';
+import Counter from './counter.js';
 import { Database, deleteDatabase } from '@indb/database';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 

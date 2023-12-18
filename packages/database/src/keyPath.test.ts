@@ -1,4 +1,4 @@
-import { getKeyPathValue } from './keyPath';
+import { getKeyPathValue } from './keyPath.js';
 import { describe, expect, test } from 'vitest';
 
 type User = {

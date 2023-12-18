@@ -1,12 +1,12 @@
-import type { Tables } from '..//test/fixtures';
+import type { Tables } from '../test/fixtures.js';
 import {
   SCHEMA,
   USERS_INDEX,
   USERS_LIST,
   compareUsers,
-} from '../test/fixtures';
-import { waitFor } from '../test/utils';
-import Slice from './slice';
+} from '../test/fixtures.js';
+import { waitFor } from '../test/utils.js';
+import Slice from './slice.js';
 import { Database, deleteDatabase } from '@indb/database';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 

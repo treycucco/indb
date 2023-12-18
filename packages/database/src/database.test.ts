@@ -1,8 +1,8 @@
-import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures';
-import type { Tables, User } from '../test/fixtures';
-import type { StoreChanges } from './change';
-import Database, { deleteDatabase } from './database';
-import type { Key } from './keyPath';
+import { SCHEMA, USERS_INDEX, USERS_LIST } from '../test/fixtures.js';
+import type { Tables, User } from '../test/fixtures.js';
+import type { StoreChanges } from './change.js';
+import Database, { deleteDatabase } from './database.js';
+import type { Key } from './keyPath.js';
 import type { Mock } from 'vitest';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 

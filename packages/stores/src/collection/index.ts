@@ -1,5 +1,5 @@
-import type { Comparer } from '../types';
-import { findIndex, getInsertIndex } from './utils';
+import type { Comparer } from '../types.js';
+import { findIndex, getInsertIndex } from './utils.js';
 import type { Key, KeyExtractor } from '@indb/database';
 
 export type CollectionData<ObjectType> = {

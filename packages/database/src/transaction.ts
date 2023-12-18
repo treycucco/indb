@@ -1,9 +1,9 @@
-import type { TransactionChange } from './change';
-import Cursor from './cursor';
-import type { CursorIteratorValue } from './cursor';
-import Deferred from './deferred';
-import type { Key, ValidKeyPaths } from './keyPath';
-import type { StoreNames } from './schema';
+import type { TransactionChange } from './change.js';
+import Cursor from './cursor.js';
+import type { CursorIteratorValue } from './cursor.js';
+import Deferred from './deferred.js';
+import type { Key, ValidKeyPaths } from './keyPath.js';
+import type { StoreNames } from './schema.js';
 
 export default class Transaction<Tables> {
   private readonly transaction: IDBTransaction;
