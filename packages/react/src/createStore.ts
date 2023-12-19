@@ -11,7 +11,7 @@ import type { Comparer, IndexFilter, Predicate } from '@indb/stores';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useSyncExternalStore } from 'use-sync-external-store/shim';
 
-type EntityStatus = 'LOADING' | 'NOT_FOUND' | 'FOUND';
+export type EntityStatus = 'LOADING' | 'NOT_FOUND' | 'FOUND';
 
 /**
  * Initialize a database, and return methods for working with it via hooks:

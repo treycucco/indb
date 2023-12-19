@@ -12,7 +12,7 @@ import { createContext } from 'preact';
 import { useSyncExternalStore } from 'preact/compat';
 import { useContext, useEffect, useState } from 'preact/hooks';
 
-type EntityStatus = 'LOADING' | 'NOT_FOUND' | 'FOUND';
+export type EntityStatus = 'LOADING' | 'NOT_FOUND' | 'FOUND';
 
 /**
  * Initialize a database, and return methods for working with it via hooks:
