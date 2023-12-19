@@ -89,6 +89,7 @@ const createStore = <Tables extends object>(
   const useEntity = <StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     key: Key,
+    indexName?: ValidKeyPaths<Tables[StoreName]>,
   ): { status: EntityStatus; entity: Tables[StoreName] | undefined } => {
     const [status, setStatus] = useState<EntityStatus>('LOADING');
     const [entity, setEntity] = useState<Tables[StoreName] | undefined>(
@@ -97,7 +98,13 @@ const createStore = <Tables extends object>(
 
     useEffect(() => {
       const load = async () => {
-        const value = await database.get(storeName, key);
+        let value: Tables[StoreName] | undefined;
+
+        if (indexName) {
+          value = await database.getIndex(storeName, indexName, key);
+        } else {
+          value = await database.get(storeName, key);
+        }
 
         if (value === undefined) {
           setStatus('NOT_FOUND');
@@ -107,7 +114,7 @@ const createStore = <Tables extends object>(
         }
       };
       load();
-    }, [storeName, key]);
+    }, [storeName, key, indexName]);
 
     return { status, entity };
   };
