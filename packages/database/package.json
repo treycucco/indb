@@ -1,6 +1,6 @@
 {
   "name": "@indb/database",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "",
   "type": "module",
   "main": "./lib/cjs/index.js",
