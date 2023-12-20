@@ -112,6 +112,13 @@ the objects in the store, or just those in an index that match a specific value.
 
 The `getSnapshot` method returns the count.
 
+### Entity
+
+The entity store represents a single record in a single object store. You
+provide the name of the store and the key, and this store will provide a
+response represnting the status of the entity (LOADING, FOUND, NOT_FOUND) and,
+when FOUND, the entity itself.
+
 ## UseSyncExternalStore
 
 All of the store classes in this package can be used with `useSyncExternalStore`

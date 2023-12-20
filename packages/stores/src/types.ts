@@ -1,5 +1,7 @@
 import type { Key, StoreNames, ValidKeyPaths } from '@indb/database';
 
+export type EntityStatus = 'LOADING' | 'FOUND' | 'NOT_FOUND';
+
 export type Comparer<T> = (left: T, right: T) => number;
 
 export type Predicate<T> = (value: T) => boolean;
