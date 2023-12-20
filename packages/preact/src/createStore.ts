@@ -6,13 +6,11 @@ import type {
   StoreNames,
   ValidKeyPaths,
 } from '@indb/database';
-import { Counter, Slice } from '@indb/stores';
+import { Counter, Entity, Slice } from '@indb/stores';
 import type { Comparer, IndexFilter, Predicate } from '@indb/stores';
 import { createContext } from 'preact';
 import { useSyncExternalStore } from 'preact/compat';
-import { useContext, useEffect, useState } from 'preact/hooks';
-
-export type EntityStatus = 'LOADING' | 'NOT_FOUND' | 'FOUND';
+import { useContext } from 'preact/hooks';
 
 /**
  * Initialize a database, and return methods for working with it via hooks:
@@ -22,8 +20,7 @@ export type EntityStatus = 'LOADING' | 'NOT_FOUND' | 'FOUND';
  * - useSlice: a hook that will create a Slice and provide its data and methods for working with
  *             the data.
  * - useCount: a hook that will create a Counter and provide its count
- * - useEntity: a hook that will load up an entity by key. This hook does not follow database
- *              updates.
+ * - useEntity: a hook that will load up an entity by key.
  *
  * For most cases you should be able to work directly with the hooks without working with context.
  */
@@ -89,34 +86,20 @@ const createStore = <Tables extends object>(
   const useEntity = <StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     key: Key,
-    indexName?: ValidKeyPaths<Tables[StoreName]>,
-  ): { status: EntityStatus; entity: Tables[StoreName] | undefined } => {
-    const [status, setStatus] = useState<EntityStatus>('LOADING');
-    const [entity, setEntity] = useState<Tables[StoreName] | undefined>(
-      undefined,
-    );
+  ) => {
+    const entity = useLifecycleMemo(() => {
+      const entity = new Entity({
+        database,
+        storeName,
+        key,
+      });
+      entity.setup();
+      return [entity, () => entity.teardown()];
+    }, [storeName, key]);
 
-    useEffect(() => {
-      const load = async () => {
-        let value: Tables[StoreName] | undefined;
+    const value = useSyncExternalStore(entity.subscribe, entity.getSnapshot);
 
-        if (indexName) {
-          value = await database.getIndex(storeName, indexName, key);
-        } else {
-          value = await database.get(storeName, key);
-        }
-
-        if (value === undefined) {
-          setStatus('NOT_FOUND');
-        } else {
-          setStatus('FOUND');
-          setEntity(value);
-        }
-      };
-      load();
-    }, [storeName, key, indexName]);
-
-    return { status, entity };
+    return value;
   };
 
   return {

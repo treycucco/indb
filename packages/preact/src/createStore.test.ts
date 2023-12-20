@@ -68,7 +68,7 @@ describe(createStore, () => {
     });
   });
 
-  describe('useStore', () => {
+  describe('useSlice', () => {
     describe('no index', () => {
       test('has the correct data', async () => {
         const { result } = renderHook(() =>
@@ -132,21 +132,73 @@ describe(createStore, () => {
     test('status is FOUND and has entity when found', async () => {
       const { result } = renderHook(() => store.useEntity('users', 1));
 
-      expect(result.current.status).toBe('LOADING');
-      expect(result.current.entity).toBeUndefined();
+      // Starts out as loading
+      expect(result.current).toEqual({ status: 'LOADING', entity: undefined });
 
-      await waitFor(() => expect(result.current.status).toBe('FOUND'));
-      expect(result.current.entity).toEqual(USERS_INDEX[1]);
+      // Eventually found
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          status: 'FOUND',
+          entity: USERS_INDEX[1],
+        }),
+      );
     });
 
     test('status is NOT_FOUND entity when entity not found', async () => {
       const { result } = renderHook(() => store.useEntity('users', 100));
 
-      expect(result.current.status).toBe('LOADING');
-      expect(result.current.entity).toBeUndefined();
+      // Starts out as loading
+      expect(result.current).toEqual({
+        status: 'LOADING',
+        entity: undefined,
+      });
 
-      await waitFor(() => expect(result.current.status).toBe('NOT_FOUND'));
-      expect(result.current.entity).toBe(undefined);
+      // Eventually not found
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          status: 'NOT_FOUND',
+          entity: undefined,
+        }),
+      );
+    });
+
+    test('entity updates with database', async () => {
+      const key = 1;
+      const { result } = renderHook(() => store.useEntity('users', key));
+
+      // Starts out as loading
+      expect(result.current).toEqual({ status: 'LOADING', entity: undefined });
+
+      // Eventually found
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          status: 'FOUND',
+          entity: USERS_INDEX[key],
+        }),
+      );
+
+      // Update and check matching
+      await store.database.update('users', key, {
+        firstName: 'ZZ',
+        lastName: 'YY',
+      });
+
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          status: 'FOUND',
+          entity: { id: key, firstName: 'ZZ', lastName: 'YY' },
+        }),
+      );
+
+      // Delete sets to not found
+      await store.database.delete('users', key);
+
+      await waitFor(() =>
+        expect(result.current).toEqual({
+          status: 'NOT_FOUND',
+          entity: undefined,
+        }),
+      );
     });
   });
 });
