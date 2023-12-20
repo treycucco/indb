@@ -1,6 +1,6 @@
 {
   "name": "@indb/preact",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "",
   "type": "module",
   "main": "./lib/cjs/index.js",
@@ -46,8 +46,8 @@
     "./lib/**/*"
   ],
   "dependencies": {
-    "@indb/database": "^0.2.10",
-    "@indb/stores": "^0.2.10"
+    "@indb/database": "^0.2.11",
+    "@indb/stores": "^0.2.11"
   },
   "devDependencies": {
     "@testing-library/preact": "^3.2.3",
