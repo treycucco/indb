@@ -1,6 +1,6 @@
 {
   "name": "@indb/stores",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "",
   "type": "module",
   "main": "./lib/cjs/index.js",
@@ -44,7 +44,7 @@
     "./lib/**/*"
   ],
   "dependencies": {
-    "@indb/database": "^0.3.1"
+    "@indb/database": "^0.3.2"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
