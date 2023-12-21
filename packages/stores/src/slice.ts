@@ -128,6 +128,9 @@ export default class Slice<
       if (change.type === 'deleted') {
         return this.removeFromCollection(change.key) || acc;
       }
+      if (change.type === 'cleared') {
+        return this.clearCollection();
+      }
       throw new Error(`Unhandled change type: ${change.type}`);
     }, false);
 
@@ -165,6 +168,17 @@ export default class Slice<
     }
 
     this.collection.add(obj);
+    return true;
+  }
+
+  /**
+   * Clear out the collection.
+   */
+  private clearCollection(): boolean {
+    if (this.collection.length === 0) {
+      return false;
+    }
+    this.collection.reset([]);
     return true;
   }
 

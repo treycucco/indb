@@ -104,6 +104,41 @@ describe(Entity, () => {
     );
   });
 
+  test('db.clear sets entity to NOT_FOUND', async () => {
+    const key = 1;
+
+    entity = new Entity<Tables, 'users'>({
+      database: db,
+      storeName: 'users',
+      key,
+    });
+
+    entity.setup();
+
+    // Status starts out in LOADING
+    expect(entity.getSnapshot()).toEqual({
+      status: 'LOADING',
+      entity: undefined,
+    });
+
+    // This entity doesn't exist yet, so we'll get NOT_FOUND
+    await waitFor(() =>
+      expect(entity.getSnapshot()).toEqual({
+        status: 'FOUND',
+        entity: USERS_INDEX[1],
+      }),
+    );
+
+    await db.clear('users');
+
+    await waitFor(() =>
+      expect(entity.getSnapshot()).toEqual({
+        status: 'NOT_FOUND',
+        entity: undefined,
+      }),
+    );
+  });
+
   test("other entities changing doesn't change snapshot", async () => {
     const key = 1;
 

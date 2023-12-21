@@ -304,6 +304,21 @@ describe(Database, () => {
     });
   });
 
+  describe('clear', () => {
+    test('clears all items from the object store', async () => {
+      expect(await db.getCount('users')).not.toBe(0);
+
+      await db.clear('users');
+
+      expect(await db.getCount('users')).toBe(0);
+
+      await assertChangeHandlerCall({
+        storeName: 'users',
+        changes: [{ type: 'cleared' }],
+      });
+    });
+  });
+
   describe('transaction', () => {
     test('fires off all events correctly', async () => {
       const tx = await db.transaction(['users'], 'readwrite');

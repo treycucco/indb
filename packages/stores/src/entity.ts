@@ -109,6 +109,9 @@ export default class Entity<
           this.snapshot = { status: 'NOT_FOUND', entity: undefined };
           changed = true;
         }
+      } else if (change.type === 'cleared') {
+        this.snapshot = { status: 'NOT_FOUND', entity: undefined };
+        changed = true;
       } else {
         throw new Error(`Unhandled change type: ${change.type}`);
       }

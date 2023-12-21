@@ -82,6 +82,35 @@ describe(Slice, () => {
           expect(slice.getSnapshot().index[1]).toBeUndefined(),
         );
       });
+
+      describe('clear', () => {
+        const emptyCollection = {
+          ids: [],
+          index: {},
+        };
+
+        test('db.clear resets the collection', async () => {
+          expect(slice.getSnapshot().ids.length).not.toEqual(emptyCollection);
+
+          await db.clear('users');
+
+          await waitFor(() =>
+            expect(slice.getSnapshot()).toEqual(emptyCollection),
+          );
+        });
+
+        test('an empty collection does not emit a change', async () => {
+          await db.clear('users');
+
+          const snapshot1 = slice.getSnapshot();
+          expect(snapshot1).toEqual(emptyCollection);
+
+          await db.clear('users');
+          const snapshot2 = slice.getSnapshot();
+
+          expect(snapshot1).toBe(snapshot2);
+        });
+      });
     });
 
     describe('with filter', () => {

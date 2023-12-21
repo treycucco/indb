@@ -354,6 +354,21 @@ export default class Database<Tables> {
   }
 
   /**
+   * Clear an object store.
+   *
+   * Dispatches the 'cleared' event.
+   */
+  async clear<StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+  ): Promise<void> {
+    const transaction = await this.transaction([storeName], 'readwrite');
+
+    transaction.clear(storeName);
+
+    return transaction.promise;
+  }
+
+  /**
    * Returns a `KeyExtractor` for the type related to the `storeName`.
    *
    * The `KeyExtractor` uses the `keyPath` from the schema for the store name.

@@ -274,6 +274,24 @@ export default class Transaction<Tables> {
   }
 
   /**
+   * Clear an object store.
+   *
+   * Dispatches the 'cleared' event.
+   */
+  async clear<StoreName extends StoreNames<Tables>>(
+    storeName: StoreName,
+  ): Promise<void> {
+    const store = this.store(storeName);
+
+    store.clear();
+
+    this.onChange({
+      type: 'cleared',
+      storeName,
+    });
+  }
+
+  /**
    * Get a store by name from the transaction.
    */
   private store<StoreName extends StoreNames<Tables>>(storeName: StoreName) {

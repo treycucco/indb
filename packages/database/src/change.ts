@@ -2,11 +2,13 @@ import type { Key } from './keyPath.js';
 
 export type TransactionChange =
   | { type: 'created' | 'updated'; storeName: string; obj: unknown }
-  | { type: 'deleted'; storeName: string; key: Key };
+  | { type: 'deleted'; storeName: string; key: Key }
+  | { type: 'cleared'; storeName: string };
 
 export type StoreChange =
   | { type: 'created' | 'updated'; obj: unknown }
-  | { type: 'deleted'; key: Key };
+  | { type: 'deleted'; key: Key }
+  | { type: 'cleared' };
 
 export type StoreChanges = {
   storeName: string;
@@ -34,6 +36,9 @@ export const mapTransactionChangesToStoreChanges = (
         break;
       case 'deleted':
         storeChanges.changes.push({ type, key: transactionChange.key });
+        break;
+      case 'cleared':
+        storeChanges.changes.push({ type });
         break;
       default:
         throw new Error(`Unhandled TransactionChange type: ${type}`);

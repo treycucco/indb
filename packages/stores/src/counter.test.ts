@@ -57,6 +57,16 @@ describe(Counter, () => {
 
         await waitFor(() => expect(counter.getSnapshot()).toBe(8));
       });
+
+      describe('clear', () => {
+        test('db.clear resets the collection', async () => {
+          expect(counter.getSnapshot()).not.toEqual(0);
+
+          await db.clear('users');
+
+          await waitFor(() => expect(counter.getSnapshot()).toEqual(0));
+        });
+      });
     });
 
     describe('filter', () => {

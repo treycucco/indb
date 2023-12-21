@@ -32,6 +32,10 @@ export default class Collection<ObjectType> {
     this.reset(objects);
   }
 
+  get length(): number {
+    return this.ids.length;
+  }
+
   /**
    * Returns the collection data as a plain old JavaScript object.
    *
@@ -49,7 +53,7 @@ export default class Collection<ObjectType> {
   }
 
   /**
-   * Completely the data data in the collection.
+   * Completely reset the data in the collection.
    */
   reset(objects: ObjectType[]) {
     const pairs = objects.map((obj): [Key, ObjectType] => [
