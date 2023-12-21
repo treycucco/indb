@@ -21,13 +21,13 @@ export type PathType<Value, Path extends string> = Value extends object
   ? Path extends keyof Value
     ? Value[Path]
     : Path extends `${infer Head}.${infer Tail}`
-    ? Head extends keyof Value
-      ? // TODO: also check for null?
-        undefined extends Value[Head]
-        ? PathType<Value[Head], Tail> | undefined
-        : PathType<Value[Head], Tail>
+      ? Head extends keyof Value
+        ? // TODO: also check for null?
+          undefined extends Value[Head]
+          ? PathType<Value[Head], Tail> | undefined
+          : PathType<Value[Head], Tail>
+        : never
       : never
-    : never
   : never;
 
 /**
