@@ -12,3 +12,4 @@ export type {
   SchemaDefinition,
 } from './schema.js';
 export { migrateSchema } from './schema.js';
+export { default as Transaction } from './transaction.js';

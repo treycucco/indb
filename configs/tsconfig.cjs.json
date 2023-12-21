@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "lib": ["ES6", "DOM", "DOM.Iterable", "ESNext.AsyncIterable"],
+    "lib": ["ES2019", "DOM", "DOM.Iterable", "ESNext.AsyncIterable"],
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES6"
