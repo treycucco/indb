@@ -3,6 +3,8 @@
 @indb is a collection of packages designed to make working with IndexedDB
 convenient with reactive UI libraries such as React and Preact.
 
+[View the docs](https://treycucco.github.io/indb)
+
 ## Non-Goals
 
 This package collection is not seeking to provide access to the full
@@ -12,7 +14,7 @@ functionality of IndexedDB.
 
 ### @indb/database
 
-The database package provides a type-safe, promise-based wrapper around 
+The database package provides a type-safe, promise-based wrapper around
 IndexedDB for the most common actions, such as:
 
 - Creating a new database
