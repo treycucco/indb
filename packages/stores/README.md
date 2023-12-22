@@ -9,6 +9,8 @@ Additionally, since the `database` instances act as event aggregators for all
 instances of the database, these in-memory stores stay up to date even when
 changes occur in other tabs or windows.
 
+[API Docs](./docs/api/index.html)
+
 ## Example
 
 An example store looks something like this:

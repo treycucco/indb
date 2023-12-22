@@ -3,6 +3,8 @@
 The database package exposes a type-safe, promise-based wrapper around the
 IndexedDB API.
 
+[API Docs](./docs/api/index.html)
+
 ## Example
 
 An example database looks something like this:

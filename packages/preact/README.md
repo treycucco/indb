@@ -4,6 +4,8 @@ The preact package provides a `createStore` method that returns a `Database`
 instance and several hooks for working with stores from
 [@indb/stores](https://www.npmjs.com/package/@indb/stores).
 
+[API Docs](./docs/api/index.html)
+
 ## Example
 
 Working with `createStore` looks like this:

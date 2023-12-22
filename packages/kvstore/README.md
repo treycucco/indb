@@ -3,6 +3,8 @@
 This is a wrapper around `@indb/database` that acts as a type-safe key-value
 store.
 
+[API Docs](./docs/api/index.html)
+
 ## Restrictions
 
 Your `@indb/database` schema must include an object store called `kvstore` and
