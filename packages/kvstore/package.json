@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npm run check && npm run clean && npm run build:esm && npm run build:cjs && npm run build:docs",
     "build:cjs": "tsc -b ./configs/tsconfig.cjs.json",
-    "build:docs": "typedoc --out ./docs/api --tsconfig ./tsconfig.json ./src/index.ts",
+    "build:docs": "typedoc --out ../../docs/kvstore/api --tsconfig ./tsconfig.json ./src/index.ts",
     "build:esm": "tsc -b ./configs/tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
     "check": "npm run test:typecheck && npm run test:prettier && npm run test:eslint && npm run test",
     "clean": "rm -rf ./lib",
