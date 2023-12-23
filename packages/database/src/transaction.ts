@@ -12,8 +12,8 @@ export default class Transaction<Tables> {
 
   constructor(transaction: IDBTransaction) {
     this.transaction = transaction;
-    this.transaction.onerror = () =>
-      this.deferred.reject(this.transaction.error);
+    this.transaction.onabort = (event) => this.deferred.reject(event);
+    this.transaction.onerror = (event) => this.deferred.reject(event);
     this.transaction.oncomplete = () => this.deferred.resolve();
   }
 
@@ -182,6 +182,7 @@ export default class Transaction<Tables> {
 
     const request = store.put(obj, key);
 
+    request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
         type: 'created',
@@ -218,6 +219,7 @@ export default class Transaction<Tables> {
 
     const request = store.put(updated);
 
+    request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
         type: 'updated',
@@ -248,6 +250,7 @@ export default class Transaction<Tables> {
 
     const request = store.put(obj);
 
+    request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
         type: exists ? 'updated' : 'created',
@@ -272,6 +275,7 @@ export default class Transaction<Tables> {
 
     const request = store.delete(key);
 
+    request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
         type: 'deleted',
@@ -293,6 +297,7 @@ export default class Transaction<Tables> {
 
     const request = store.clear();
 
+    request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
         type: 'cleared',

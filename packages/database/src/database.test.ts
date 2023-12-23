@@ -47,6 +47,13 @@ describe(Database, () => {
 
       expect(user).toBeUndefined();
     });
+
+    test('throws a catchable error when given bad data', () => {
+      // @ts-expect-error intentionally bad name
+      expect(async () => await db.get('user', 1)).rejects.toThrowError(
+        /no objectstore named user/i,
+      );
+    });
   });
 
   describe('getAll', () => {
@@ -55,6 +62,13 @@ describe(Database, () => {
 
       expect(Object.fromEntries(users.map((user) => [user.id, user]))).toEqual(
         USERS_INDEX,
+      );
+    });
+
+    test('throws a catchable error when given bad data', () => {
+      // @ts-expect-error intentionally bad name
+      expect(async () => await db.getAll('user', 1)).rejects.toThrowError(
+        /no objectstore named user/i,
       );
     });
   });
@@ -68,6 +82,13 @@ describe(Database, () => {
     test('returns undefined when there are no matches', async () => {
       const user = await db.getIndex('users', 'favorite.color', 'purple');
       expect(user).toBeUndefined();
+    });
+
+    test('throws a catchable error when given bad data', () => {
+      expect(
+        // @ts-expect-error intentionally bad name
+        async () => await db.getIndex('users', 'favorite.colors', 'purple'),
+      ).rejects.toThrowError(/database object could not be found/i);
     });
   });
 
@@ -88,6 +109,13 @@ describe(Database, () => {
       const users = await db.getIndexAll('users', 'favorite.color', 'purple');
 
       expect(users).toEqual([]);
+    });
+
+    test('throws a catchable error when given bad data', () => {
+      expect(
+        // @ts-expect-error intentionally bad name
+        async () => await db.getIndexAll('users', 'favorite.colors', 'purple'),
+      ).rejects.toThrowError(/database object could not be found/i);
     });
   });
 
@@ -143,6 +171,13 @@ describe(Database, () => {
         changes: deleted.map((key) => ({ type: 'deleted', key })),
       });
     });
+
+    test('throws a catchable error when given bad data', () => {
+      expect(
+        // @ts-expect-error intentionally bad name
+        async () => await db.iterate('user'),
+      ).rejects.toThrowError(/no objectstore named user/i);
+    });
   });
 
   describe('iterateIndex', () => {
@@ -166,6 +201,13 @@ describe(Database, () => {
         ),
       );
     });
+
+    test('throws a catchable error when given bad data', () => {
+      expect(
+        // @ts-expect-error intentionally bad name
+        async () => await db.iterateIndex('users', 'favorite.colors', 'blue'),
+      ).rejects.toThrowError(/database object could not be found/i);
+    });
   });
 
   describe('getCount', () => {
@@ -173,12 +215,26 @@ describe(Database, () => {
       const count = await db.getCount('users');
       expect(count).toBe(9);
     });
+
+    test('throws a catchable error when given bad data', () => {
+      // @ts-expect-error intentionally bad name
+      expect(async () => await db.getCount('user')).rejects.toThrowError(
+        /no objectstore named user/i,
+      );
+    });
   });
 
   describe('getIndexCount', () => {
     test('gets the count of objects in the store', async () => {
       const count = await db.getIndexCount('users', 'favorite.color', 'blue');
       expect(count).toBe(3);
+    });
+
+    test('throws a catchable error when given bad data', () => {
+      expect(
+        // @ts-expect-error intentionally bad name
+        async () => await db.getIndexCount('users', 'favorite.colors', 'blue'),
+      ).rejects.toThrowError(/database object could not be found/i);
     });
   });
 
@@ -215,6 +271,18 @@ describe(Database, () => {
         storeName: 'users',
         changes: [{ type: 'created', obj: updatedUser }],
       });
+    });
+
+    test('unique constraints throw a catchable error', () => {
+      expect(
+        async () =>
+          await db.put('users', {
+            id: 100,
+            secondaryId: 1, // User id 1 has secondary id 1
+            firstName: 'G',
+            lastName: 'G',
+          }),
+      ).rejects.toThrowError(/constraint/);
     });
   });
 
@@ -273,6 +341,15 @@ describe(Database, () => {
 
       expect(response).toBeUndefined();
       expect(changeHandler).toHaveBeenCalledTimes(0);
+    });
+
+    test('unique constraints throw a catchable error', () => {
+      expect(
+        async () =>
+          await db.update('users', 1, {
+            secondaryId: 2,
+          }),
+      ).rejects.toThrowError(/constraint/);
     });
   });
 

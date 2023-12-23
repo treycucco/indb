@@ -34,6 +34,8 @@ export default class Cursor<Tables, StoreName extends StoreNames<Tables>>
       IteratorResult<CursorIteratorValue<Tables[StoreName]>>
     >();
 
+    request.onerror = () => this.deferred.reject(request.error);
+
     // the onsuccess handler is called after creating the cursor, and then again every time
     // `continue` is called. In `next` we will create a new deferred and call continue, and then
     // once the value is ready this handler will be called and will resolve on the deferred that
@@ -71,6 +73,7 @@ export default class Cursor<Tables, StoreName extends StoreNames<Tables>>
 
     const request = this.cursor.update(updated);
 
+    request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
         type: 'updated',
@@ -91,12 +94,14 @@ export default class Cursor<Tables, StoreName extends StoreNames<Tables>>
     }
 
     const request = this.cursor.delete();
+    const key = this.cursor.key as Key;
 
+    request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
         type: 'deleted',
         storeName: this.storeName,
-        key: this.cursor.key as Key,
+        key,
       });
     };
   };

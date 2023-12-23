@@ -132,7 +132,12 @@ export default class Database<Tables> {
       db.transaction(storeNames, mode),
     );
 
-    transaction.promise.then(() => this.dispatchChanges(transaction.changes));
+    // This `.then` chain is separate from any that might be placed on the transaction by the
+    // caller. If the promise rejects, this chain will result in a unhandled rejection. Tha's why
+    // we add a `.catch`. Since we're not doing anything with the error, we keep it empty.
+    transaction.promise
+      .then(() => this.dispatchChanges(transaction.changes))
+      .catch(() => {});
 
     return transaction;
   }
