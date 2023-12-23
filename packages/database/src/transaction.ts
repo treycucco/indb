@@ -180,13 +180,15 @@ export default class Transaction<Tables> {
   ): Promise<void> {
     const store = this.store(storeName);
 
-    store.put(obj, key);
+    const request = store.put(obj, key);
 
-    this.onChange({
-      type: 'created',
-      storeName,
-      obj,
-    });
+    request.onsuccess = () => {
+      this.onChange({
+        type: 'created',
+        storeName,
+        obj,
+      });
+    };
   }
 
   /**
@@ -214,13 +216,15 @@ export default class Transaction<Tables> {
 
     const updated = { ...obj, ...updates } as Tables[StoreName];
 
-    store.put(updated);
+    const request = store.put(updated);
 
-    this.onChange({
-      type: 'updated',
-      storeName,
-      obj: updated,
-    });
+    request.onsuccess = () => {
+      this.onChange({
+        type: 'updated',
+        storeName,
+        obj: updated,
+      });
+    };
 
     return updated;
   }
@@ -242,13 +246,15 @@ export default class Transaction<Tables> {
       await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(store, key),
     );
 
-    store.put(obj);
+    const request = store.put(obj);
 
-    this.onChange({
-      type: exists ? 'updated' : 'created',
-      storeName,
-      obj,
-    });
+    request.onsuccess = () => {
+      this.onChange({
+        type: exists ? 'updated' : 'created',
+        storeName,
+        obj,
+      });
+    };
 
     return obj;
   }
@@ -264,13 +270,15 @@ export default class Transaction<Tables> {
   ): Promise<void> {
     const store = this.store(storeName);
 
-    store.delete(key);
+    const request = store.delete(key);
 
-    this.onChange({
-      type: 'deleted',
-      storeName,
-      key,
-    });
+    request.onsuccess = () => {
+      this.onChange({
+        type: 'deleted',
+        storeName,
+        key,
+      });
+    };
   }
 
   /**
@@ -283,12 +291,14 @@ export default class Transaction<Tables> {
   ): Promise<void> {
     const store = this.store(storeName);
 
-    store.clear();
+    const request = store.clear();
 
-    this.onChange({
-      type: 'cleared',
-      storeName,
-    });
+    request.onsuccess = () => {
+      this.onChange({
+        type: 'cleared',
+        storeName,
+      });
+    };
   }
 
   /**

@@ -69,9 +69,15 @@ export default class Cursor<Tables, StoreName extends StoreNames<Tables>>
     const value = this.cursor.value as Tables[StoreName];
     const updated = { ...value, ...updates };
 
-    this.cursor.update(updated);
+    const request = this.cursor.update(updated);
 
-    this.onChange({ type: 'updated', storeName: this.storeName, obj: updated });
+    request.onsuccess = () => {
+      this.onChange({
+        type: 'updated',
+        storeName: this.storeName,
+        obj: updated,
+      });
+    };
 
     return updated;
   };
@@ -84,13 +90,15 @@ export default class Cursor<Tables, StoreName extends StoreNames<Tables>>
       throw new Error('No cursor');
     }
 
-    this.cursor.delete();
+    const request = this.cursor.delete();
 
-    this.onChange({
-      type: 'deleted',
-      storeName: this.storeName,
-      key: this.cursor.key as Key,
-    });
+    request.onsuccess = () => {
+      this.onChange({
+        type: 'deleted',
+        storeName: this.storeName,
+        key: this.cursor.key as Key,
+      });
+    };
   };
 
   async next(): Promise<

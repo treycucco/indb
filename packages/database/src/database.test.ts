@@ -184,7 +184,12 @@ describe(Database, () => {
 
   describe('put', () => {
     test("adds a new object when the key doesn't exist", async () => {
-      const newUser = { id: 100, firstName: 'Z', lastName: 'Z' };
+      const newUser = {
+        id: 100,
+        secondaryId: 100,
+        firstName: 'Z',
+        lastName: 'Z',
+      };
       await db.put('users', newUser);
 
       expect(await db.get('users', 100)).toEqual(newUser);
@@ -196,7 +201,12 @@ describe(Database, () => {
     });
 
     test('updates existing object when the key exists', async () => {
-      const updatedUser = { id: 1, firstName: 'Z', lastName: 'Z' };
+      const updatedUser = {
+        id: 1,
+        secondaryId: 1,
+        firstName: 'Z',
+        lastName: 'Z',
+      };
       await db.put('users', updatedUser);
 
       expect(await db.get('users', 1)).toEqual(updatedUser);
@@ -210,8 +220,18 @@ describe(Database, () => {
 
   describe('putMany', () => {
     test('adds and updates objects', async () => {
-      const updatedUser = { id: 1, firstName: 'Y', lastName: 'Y' };
-      const newUser = { id: 100, firstName: 'Z', lastName: 'Z' };
+      const updatedUser = {
+        id: 1,
+        secondaryId: 1,
+        firstName: 'Y',
+        lastName: 'Y',
+      };
+      const newUser = {
+        id: 100,
+        secondaryId: 100,
+        firstName: 'Z',
+        lastName: 'Z',
+      };
 
       await db.putMany('users', [updatedUser, newUser]);
 
@@ -258,7 +278,12 @@ describe(Database, () => {
 
   describe('upsert', () => {
     test("adds a new object when the key doesn't exist and dispatches created event", async () => {
-      const newUser = { id: 100, firstName: 'Z', lastName: 'Z' };
+      const newUser = {
+        id: 100,
+        secondaryId: 100,
+        firstName: 'Z',
+        lastName: 'Z',
+      };
       await db.upsert('users', 100, newUser);
 
       expect(await db.get('users', 100)).toEqual(newUser);
@@ -270,7 +295,12 @@ describe(Database, () => {
     });
 
     test('updates existing object when the key exists and dispatches updated event', async () => {
-      const updatedUser = { id: 1, firstName: 'Z', lastName: 'Z' };
+      const updatedUser = {
+        id: 1,
+        secondaryId: 1,
+        firstName: 'Z',
+        lastName: 'Z',
+      };
       await db.upsert('users', 1, updatedUser);
 
       expect(await db.get('users', 1)).toEqual(updatedUser);
@@ -323,7 +353,12 @@ describe(Database, () => {
     test('fires off all events correctly', async () => {
       const tx = await db.transaction(['users'], 'readwrite');
 
-      const initialUser: User = { id: 100, firstName: 'Z', lastName: 'T' };
+      const initialUser: User = {
+        id: 100,
+        secondaryId: 100,
+        firstName: 'Z',
+        lastName: 'T',
+      };
 
       tx.put('users', initialUser);
 
