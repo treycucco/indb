@@ -9,6 +9,7 @@
   "license": "MIT",
   "scripts": {
     "build": "npm run build --ws",
+    "build:docs": "npm run build:docs --ws",
     "check": "npm run check --ws",
     "clean": "npm run clean --ws",
     "publish": "npm run build --ws && npm publish --ws --access public"
