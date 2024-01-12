@@ -1,6 +1,6 @@
 {
   "name": "@indb/kvstore",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "",
   "type": "module",
   "main": "./lib/cjs/index.js",
@@ -45,7 +45,7 @@
     "./lib/**/*"
   ],
   "dependencies": {
-    "@indb/database": "^0.3.3"
+    "@indb/database": "^0.3.4"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
