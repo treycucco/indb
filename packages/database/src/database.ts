@@ -327,6 +327,10 @@ export default class Database<Tables> {
   /**
    * Insert or update an object in an object store.
    *
+   * If the object exists and `updateMap` is provided, the return value from `updateMap` will be
+   * used to update the record. This allows you to update specific keys of the record if it exists,
+   * but create an entire record if it does not.
+   *
    * This method checks for the existence of the object before inserting, and will dispatch an
    * event based on what it finds, either 'created' if not object was found or 'updated' if an
    * object was found.
@@ -335,9 +339,10 @@ export default class Database<Tables> {
     storeName: StoreName,
     key: Key,
     obj: Tables[StoreName],
+    updateMap?: (record: Tables[StoreName]) => Partial<Tables[StoreName]>,
   ): Promise<Tables[StoreName]> {
     const transaction = await this.transaction([storeName], 'readwrite');
-    const result = transaction.upsert(storeName, key, obj);
+    const result = transaction.upsert(storeName, key, obj, updateMap);
 
     return transaction.promise.then(() => result);
   }

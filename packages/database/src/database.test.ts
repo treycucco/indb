@@ -387,6 +387,24 @@ describe(Database, () => {
         changes: [{ type: 'updated', obj: updatedUser }],
       });
     });
+
+    test('updates part of existing object when the key exists and updateMap is provided', async () => {
+      const updatedUser = {
+        id: 1,
+        secondaryId: 1,
+        firstName: 'Y',
+        lastName: 'Y',
+      };
+      const expected = { ...USERS_INDEX[1], lastName: 'Z' };
+      await db.upsert('users', 1, updatedUser, () => ({ lastName: 'Z' }));
+
+      expect(await db.get('users', 1)).toEqual(expected);
+
+      await assertChangeHandlerCall({
+        storeName: 'users',
+        changes: [{ type: 'updated', obj: expected }],
+      });
+    });
   });
 
   describe('delete', () => {

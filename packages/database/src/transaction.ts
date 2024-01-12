@@ -234,6 +234,10 @@ export default class Transaction<Tables> {
   /**
    * Insert or update an object in an object store.
    *
+   * If the object exists and `updateMap` is provided, the return value from `updateMap` will be
+   * used to update the record. This allows you to update specific keys of the record if it exists,
+   * but create an entire record if it does not.
+   *
    * This method checks for the existence of the object before inserting, and will dispatch an
    * event based on what it finds, either 'created' if not object was found or 'updated' if an
    * object was found.
@@ -242,24 +246,35 @@ export default class Transaction<Tables> {
     storeName: StoreName,
     key: Key,
     obj: Tables[StoreName],
+    updateMap?: (record: Tables[StoreName]) => Partial<Tables[StoreName]>,
   ): Promise<Tables[StoreName]> {
     const store = this.store(storeName);
-    const exists = Boolean(
-      await this.getFromStoreOrIndex<Tables[StoreName], typeof key>(store, key),
-    );
+    const existing = await this.getFromStoreOrIndex<
+      Tables[StoreName],
+      typeof key
+    >(store, key);
 
-    const request = store.put(obj);
+    let request: IDBRequest;
+    let result: Tables[StoreName];
+
+    if (existing && updateMap) {
+      result = { ...existing, ...updateMap(existing) };
+      request = store.put(result);
+    } else {
+      result = obj;
+      request = store.put(obj);
+    }
 
     request.onerror = () => this.deferred.reject(request.error);
     request.onsuccess = () => {
       this.onChange({
-        type: exists ? 'updated' : 'created',
+        type: existing ? 'updated' : 'created',
         storeName,
-        obj,
+        obj: result,
       });
     };
 
-    return obj;
+    return result;
   }
 
   /**
