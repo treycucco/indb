@@ -26,23 +26,24 @@ export default class Transaction<Tables> {
   }
 
   /**
-   * Get an object by key from an object store.
+   * Get an object by key from an object store, or the first item in an key range.
    */
   async get<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
-    key: Key,
+    key: Key | IDBKeyRange,
   ): Promise<Tables[StoreName] | undefined> {
     return this.getFromStoreOrIndex(this.store(storeName), key);
   }
 
   /**
-   * Get all objects in an object store.
+   * Get all objects in an object store, or all objects matching a key range.
    */
   async getAll<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
+    keyRange?: IDBKeyRange,
   ): Promise<Array<Tables[StoreName]>> {
     const store = this.store(storeName);
-    const request = store.getAll();
+    const request = store.getAll(keyRange);
 
     return new Promise<Array<Tables[StoreName]>>((resolve, reject) => {
       request.onerror = () => reject(request.error);
@@ -63,19 +64,19 @@ export default class Transaction<Tables> {
   async getIndex<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     indexName: ValidKeyPaths<Tables[StoreName]>,
-    key: Key,
+    key: Key | IDBKeyRange,
   ): Promise<Tables[StoreName] | undefined> {
     const { index } = this.index(storeName, indexName);
     return this.getFromStoreOrIndex(index, key);
   }
 
   /**
-   * Get all values from an index that match a key value.
+   * Get all values from an index that match a key value or a key range.
    */
   async getIndexAll<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     indexName: ValidKeyPaths<Tables[StoreName]>,
-    key: Key,
+    key: Key | IDBKeyRange,
   ): Promise<Array<Tables[StoreName]>> {
     const { index } = this.index(storeName, indexName);
     const request = index.getAll(key);
@@ -88,39 +89,43 @@ export default class Transaction<Tables> {
   }
 
   /**
-   * Returns a Cursor which will iterate over the store.
+   * Returns a Cursor which will iterate over the store, or over the key range.
    */
   iterate<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
+    keyRange?: IDBKeyRange,
+    direction?: IDBCursorDirection,
   ): AsyncIterable<CursorIteratorValue<Tables[StoreName]>> {
     const store = this.store(storeName);
-    const request = store.openCursor();
+    const request = store.openCursor(keyRange, direction);
 
     return new Cursor<Tables, StoreName>(storeName, this.onChange, request);
   }
 
   /**
-   * Returns a Cursor which will iterate over the index for a key.
+   * Returns a Cursor which will iterate over the index for a key or a key range.
    */
   iterateIndex<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     indexName: ValidKeyPaths<Tables[StoreName]>,
-    key: Key,
+    key: Key | IDBKeyRange,
+    direction?: IDBCursorDirection,
   ): AsyncIterable<CursorIteratorValue<Tables[StoreName]>> {
     const { index } = this.index(storeName, indexName);
-    const request = index.openCursor(key);
+    const request = index.openCursor(key, direction);
 
     return new Cursor<Tables, StoreName>(storeName, this.onChange, request);
   }
 
   /**
-   * Get the count of objects in an object store.
+   * Get the count of objects in an object store, or the count that matches a key range.
    */
   async getCount<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
+    keyRange?: IDBKeyRange,
   ): Promise<number> {
     const store = this.store(storeName);
-    const request = store.count();
+    const request = store.count(keyRange);
 
     return new Promise<number>((resolve, reject) => {
       request.onerror = () => reject(request.error);
@@ -129,12 +134,12 @@ export default class Transaction<Tables> {
   }
 
   /**
-   * Get the count of objects in an index that match a key value.
+   * Get the count of objects in an index that match a key value or range.
    */
   async getIndexCount<StoreName extends StoreNames<Tables>>(
     storeName: StoreName,
     indexName: ValidKeyPaths<Tables[StoreName]>,
-    key: Key,
+    key: Key | IDBKeyRange,
   ): Promise<number> {
     const { index } = this.index(storeName, indexName);
     const request = index.count(key);
@@ -146,11 +151,11 @@ export default class Transaction<Tables> {
   }
 
   /**
-   * Gets an object by key from an object store.
+   * Gets an object by key from an object store, or the first item in a key range.
    */
   private async getFromStoreOrIndex<ObjectType, KeyType extends Key>(
     storeOrIndex: IDBObjectStore | IDBIndex,
-    key: KeyType,
+    key: KeyType | IDBKeyRange,
   ): Promise<ObjectType | undefined> {
     const request = storeOrIndex.get(key);
 

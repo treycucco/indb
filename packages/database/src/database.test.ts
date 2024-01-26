@@ -84,6 +84,15 @@ describe(Database, () => {
       expect(user).toBeUndefined();
     });
 
+    test('gets first item in key range', async () => {
+      const user = await db.getIndex(
+        'users',
+        'secondaryId',
+        IDBKeyRange.lowerBound(3),
+      );
+      expect(user).toEqual(USERS_INDEX[3]);
+    });
+
     test('throws a catchable error when given bad data', () => {
       expect(
         // @ts-expect-error intentionally bad name
@@ -128,9 +137,20 @@ describe(Database, () => {
         users.push(value.obj);
       }
 
-      expect(Object.fromEntries(users.map((user) => [user.id, user]))).toEqual(
-        USERS_INDEX,
-      );
+      expect(users).toEqual(USERS_LIST);
+    });
+
+    test('iterates backwards', async () => {
+      const users: User[] = [];
+      const { iterator } = await db.iterate('users', undefined, 'prev');
+
+      for await (const value of iterator) {
+        users.push(value.obj);
+      }
+
+      const expected = [...USERS_LIST].reverse();
+
+      expect(users).toEqual(expected);
     });
 
     test('raises events for updated people', async () => {
@@ -193,13 +213,32 @@ describe(Database, () => {
         users.push(value.obj);
       }
 
-      expect(Object.fromEntries(users.map((user) => [user.id, user]))).toEqual(
-        Object.fromEntries(
-          USERS_LIST.filter((user) => user.favorite?.color === 'blue').map(
-            (user) => [user.id, user],
-          ),
-        ),
+      const expected = USERS_LIST.filter(
+        (user) => user.favorite?.color === 'blue',
       );
+
+      expect(users).toEqual(expected);
+    });
+
+    test('iterates backwards', async () => {
+      const users: User[] = [];
+      const { iterator } = await db.iterateIndex(
+        'users',
+        'secondaryId',
+        IDBKeyRange.bound(-Infinity, Infinity),
+        'prev',
+      );
+
+      for await (const value of iterator) {
+        users.push(value.obj);
+      }
+
+      // Sorted backwards
+      const expected = [...USERS_LIST].sort(
+        (left, right) => right.secondaryId - left.secondaryId,
+      );
+
+      expect(users).toEqual(expected);
     });
 
     test('throws a catchable error when given bad data', () => {
